@@ -29,7 +29,7 @@ FPE_FILTER	= sed						\
 		-e 's/[Ii][Nn][Ff][Ii][Nn][Ii][Yy]/inf/'
 
 O               = array.o bi_funct.o bi_vars.o cast.o code.o da.o error.o \
-		  execute.o fcall.o field.o files.o fin.o hash.o init.o int.o \
+		  execute.o fcall.o field.o files.o fin.o hash.o xxhash.o init.o int.o \
 		  jmp.o kw.o main.o memory.o parse.o print.o \
 		  printf.o re_cmpl.o scan.o scancode.o split.o version.o \
 		  zmalloc.o

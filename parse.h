@@ -1,21 +1,20 @@
+/* A Bison parser, made by GNU Bison 3.3.2.  */
 
-/* A Bison parser, made by GNU Bison 2.4.1.  */
+/* Bison interface for Yacc-like parsers in C
 
-/* Skeleton interface for Bison's Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
-   
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Inc.
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -28,94 +27,105 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+/* Undocumented macros, especially those whose name start with YY_,
+   are private implementation details.  Do not rely on them.  */
 
-/* Tokens.  */
+#ifndef YY_YY_Y_TAB_H_INCLUDED
+# define YY_YY_Y_TAB_H_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int yydebug;
+#endif
+
+/* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     UNEXPECTED = 258,
-     BAD_DECIMAL = 259,
-     NL = 260,
-     SEMI_COLON = 261,
-     LBRACE = 262,
-     RBRACE = 263,
-     LBOX = 264,
-     RBOX = 265,
-     COMMA = 266,
-     IO_OUT = 267,
-     POW_ASG = 268,
-     MOD_ASG = 269,
-     DIV_ASG = 270,
-     MUL_ASG = 271,
-     SUB_ASG = 272,
-     ADD_ASG = 273,
-     ASSIGN = 274,
-     COLON = 275,
-     QMARK = 276,
-     OR = 277,
-     AND = 278,
-     IN = 279,
-     MATCH = 280,
-     GTE = 281,
-     GT = 282,
-     LTE = 283,
-     LT = 284,
-     NEQ = 285,
-     EQ = 286,
-     CAT = 287,
-     GETLINE = 288,
-     MINUS = 289,
-     PLUS = 290,
-     MOD = 291,
-     DIV = 292,
-     MUL = 293,
-     UMINUS = 294,
-     NOT = 295,
-     PIPE = 296,
-     IO_IN = 297,
-     POW = 298,
-     INC_or_DEC = 299,
-     FIELD = 300,
-     DOLLAR = 301,
-     RPAREN = 302,
-     LPAREN = 303,
-     DOUBLE = 304,
-     STRING_ = 305,
-     RE = 306,
-     ID = 307,
-     D_ID = 308,
-     FUNCT_ID = 309,
-     BUILTIN = 310,
-     LENGTH = 311,
-     PRINT = 312,
-     PRINTF = 313,
-     SPLIT = 314,
-     MATCH_FUNC = 315,
-     SUB = 316,
-     GSUB = 317,
-     SPRINTF = 318,
-     DO = 319,
-     WHILE = 320,
-     FOR = 321,
-     BREAK = 322,
-     CONTINUE = 323,
-     IF = 324,
-     ELSE = 325,
-     DELETE = 326,
-     BEGIN = 327,
-     END = 328,
-     EXIT = 329,
-     NEXT = 330,
-     NEXTFILE = 331,
-     RETURN = 332,
-     FUNCTION = 333
-   };
+  enum yytokentype
+  {
+    UNEXPECTED = 258,
+    BAD_DECIMAL = 259,
+    NL = 260,
+    SEMI_COLON = 261,
+    LBRACE = 262,
+    RBRACE = 263,
+    LBOX = 264,
+    RBOX = 265,
+    COMMA = 266,
+    IO_OUT = 267,
+    ASSIGN = 268,
+    ADD_ASG = 269,
+    SUB_ASG = 270,
+    MUL_ASG = 271,
+    DIV_ASG = 272,
+    MOD_ASG = 273,
+    POW_ASG = 274,
+    QMARK = 275,
+    COLON = 276,
+    OR = 277,
+    AND = 278,
+    IN = 279,
+    MATCH = 280,
+    EQ = 281,
+    NEQ = 282,
+    LT = 283,
+    LTE = 284,
+    GT = 285,
+    GTE = 286,
+    CAT = 287,
+    GETLINE = 288,
+    PLUS = 289,
+    MINUS = 290,
+    MUL = 291,
+    DIV = 292,
+    MOD = 293,
+    NOT = 294,
+    UMINUS = 295,
+    IO_IN = 296,
+    PIPE = 297,
+    POW = 298,
+    INC_or_DEC = 299,
+    DOLLAR = 300,
+    FIELD = 301,
+    LPAREN = 302,
+    RPAREN = 303,
+    DOUBLE = 304,
+    STRING_ = 305,
+    RE = 306,
+    ID = 307,
+    D_ID = 308,
+    FUNCT_ID = 309,
+    BUILTIN = 310,
+    LENGTH = 311,
+    PRINT = 312,
+    PRINTF = 313,
+    SPLIT = 314,
+    MATCH_FUNC = 315,
+    SUB = 316,
+    GSUB = 317,
+    SPRINTF = 318,
+    DO = 319,
+    WHILE = 320,
+    FOR = 321,
+    BREAK = 322,
+    CONTINUE = 323,
+    IF = 324,
+    ELSE = 325,
+    DELETE = 326,
+    BEGIN = 327,
+    END = 328,
+    EXIT = 329,
+    NEXT = 330,
+    NEXTFILE = 331,
+    RETURN = 332,
+    FUNCTION = 333
+  };
 #endif
 /* Tokens.  */
 #define UNEXPECTED 258
@@ -128,42 +138,42 @@
 #define RBOX 265
 #define COMMA 266
 #define IO_OUT 267
-#define POW_ASG 268
-#define MOD_ASG 269
-#define DIV_ASG 270
+#define ASSIGN 268
+#define ADD_ASG 269
+#define SUB_ASG 270
 #define MUL_ASG 271
-#define SUB_ASG 272
-#define ADD_ASG 273
-#define ASSIGN 274
-#define COLON 275
-#define QMARK 276
+#define DIV_ASG 272
+#define MOD_ASG 273
+#define POW_ASG 274
+#define QMARK 275
+#define COLON 276
 #define OR 277
 #define AND 278
 #define IN 279
 #define MATCH 280
-#define GTE 281
-#define GT 282
-#define LTE 283
-#define LT 284
-#define NEQ 285
-#define EQ 286
+#define EQ 281
+#define NEQ 282
+#define LT 283
+#define LTE 284
+#define GT 285
+#define GTE 286
 #define CAT 287
 #define GETLINE 288
-#define MINUS 289
-#define PLUS 290
-#define MOD 291
+#define PLUS 289
+#define MINUS 290
+#define MUL 291
 #define DIV 292
-#define MUL 293
-#define UMINUS 294
-#define NOT 295
-#define PIPE 296
-#define IO_IN 297
+#define MOD 293
+#define NOT 294
+#define UMINUS 295
+#define IO_IN 296
+#define PIPE 297
 #define POW 298
 #define INC_or_DEC 299
-#define FIELD 300
-#define DOLLAR 301
-#define RPAREN 302
-#define LPAREN 303
+#define DOLLAR 300
+#define FIELD 301
+#define LPAREN 302
+#define RPAREN 303
 #define DOUBLE 304
 #define STRING_ 305
 #define RE 306
@@ -195,15 +205,12 @@
 #define RETURN 332
 #define FUNCTION 333
 
-
-
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
-{
 
-/* Line 1676 of yacc.c  */
-#line 64 "parse.y"
+union YYSTYPE
+{
+#line 64 "parse.y" /* yacc.c:1927  */
 
 CELL *cp ;
 SYMTAB *stp ;
@@ -216,16 +223,17 @@ CA_REC   *ca_p  ;
 int   ival ;
 PTR   ptr ;
 
+#line 227 "y.tab.h" /* yacc.c:1927  */
+};
 
-
-/* Line 1676 of yacc.c  */
-#line 223 "y.tab.h"
-} YYSTYPE;
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
+
 extern YYSTYPE yylval;
 
+int yyparse (void);
 
+#endif /* !YY_YY_Y_TAB_H_INCLUDED  */

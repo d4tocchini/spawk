@@ -89,10 +89,10 @@ static CELL unused ;             /*unuseful rarely used temp */
 
 void
 execute(
-   INST *cdp ,		 /* code ptr, start execution here */
-   register CELL *sp ,		 /* eval_stack pointer */
-   CELL *fp			 /* frame ptr into eval_stack for
-			            user defined functions */
+   INST *cdp ,		 		/* code ptr, start execution here */
+   register CELL *sp ,	/* eval_stack pointer */
+   CELL *fp			 		/* frame ptr into eval_stack for
+			            		user defined functions */
    )
 {
    /* some useful temporaries */

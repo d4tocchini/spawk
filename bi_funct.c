@@ -12,7 +12,8 @@ the GNU General Public License, version 3, 2007.
 If you import elements of this code into another product,
 you agree to not name that product mawk.
 ********************************************/
-
+// #define _GNU_SOURCE
+// #define __GLIBC__ // https://git.alpinelinux.org/aports/diff/unmaintained/ruby-posix-spawn/0001-Only-use-POSIX_SPAWN_USEVFORK-if-defined-or-if-GNU-l.patch?id=3ce3c4fd596debefbad77328a9b62a39eccf753c
 #include "config.h"	/* needed to resolve intersystem conflicts on C and C++ declarations of random() and srandom() */
 
 #include "mawk.h"
@@ -31,6 +32,8 @@ you agree to not name that product mawk.
 #include <sys/time.h>
 #include <sys/wait.h>
 
+
+
 #if defined(__cplusplus)
 #define THROW__ throw()
 #else
@@ -45,10 +48,247 @@ extern long int random (void) THROW__;
 extern void srandom (unsigned int __seed) THROW__;
 #endif
 
+
+
+// D4
+#include "xxhash.h"
+// D4
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+// #include <ctype.h>
+#include <string.h>
+
+#include <err.h>
+
+// D4 spawn
+// #include <stdlib.h>
+// #include <stdio.h>
+// #include <string.h>
+#include <unistd.h>
+
+
+// D4 vfork
+// #include <unistd.h>
+#include <signal.h>
+#include <err.h>
+// #include <stdlib.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+// #include <stdio.h>
+
+
+// https://stackoverflow.com/questions/2731531/faster-forking-of-large-processes-on-linux
+// http://manpages.ubuntu.com/manpages/bionic/man3/posix_spawn.3.html
+// #define _GNU_SOURCE
+#include <spawn.h>
+//
+
+// #include <sys/wait.h>
+
+#include <stdarg.h>
+
+// #define _OPEN_SYS_ITOA_EXT
+// #include <stdlib.h>
+// char * itoa(int n, char * buffer, int radix);
+
+// #define xhash(sval) hash2((sval)->str, (sval)->len)
+
+
+
+// https://www.tutorialspoint.com/tpcg.php?p=kpclzA
+// https://stackoverflow.com/questions/4014827/best-way-to-switch-on-a-string-in-c
+#ifndef SWITCH_CASE_INIT
+#define SWITCH_CASE_INIT
+    #define SWITCH(X) \
+        char* __switch_p__ = X; \
+        for (int __switch_next__=1 ; __switch_p__ ; __switch_p__=0, __switch_next__=1) \
+        { {
+    #define CASE(X) \
+        } if (!__switch_next__ || !(__switch_next__ = strcmp(__switch_p__, X))) {
+    #define DEFAULT \
+        } {
+    #define END \
+        } }
+#endif
+
+
+/*
+char *xx = stringf(9000, "hello this it %d !!", 100);
+
+printf("%s",xx);
+printf("Length of String is %lu\n", strlen(xx));
+printf("Size of String is %lu\n", sizeof(xx));
+*/
+char * stringf(const int maxlen, const char *fmt, ...)
+{
+        char *p;
+        va_list ap;
+        if ((p = malloc(maxlen + 1)) == NULL)
+                return (NULL);
+        va_start(ap, fmt);
+        (void) vsnprintf(p, maxlen + 1, fmt, ap);
+        va_end(ap);
+        return (p);
+}
+
+/*
+char** a_v = NULL;
+size_t a_c = 0;
+// ---
+printf("---\n");
+a_print(a_v, a_c);
+a_push(&a_v, &a_c, "Hello World!");
+printf("%d: %s %s %s %s\n",a_c, a_v[0],a_v[1],a_v[2],a_v[3]);
+printf("---\n");
+a_print(a_v, a_c);
+a_push(&a_v, &a_c, "123");
+a_push(&a_v, &a_c, "AAAAAAA");
+printf("---\n");
+a_print(a_v, a_c);
+printf("===\n");
+ printf("%d === ",a_c);
+a_print(a_v, a_c);
+char* popped = a_pop(&a_v, &a_c);
+printf("pop -> %s\n",popped);
+printf("%d === ",a_c);
+a_print(a_v, a_c);
+printf("---\n");
+a_push(&a_v, &a_c, "BBBBBB");
+ printf("%d === ",a_c);
+    a_print(a_v, a_c);
+while (a_c) {
+    printf("pop -> %s\n",a_pop(&a_v, &a_c));
+    printf("%d === ",a_c);
+    a_print(a_v, a_c);
+}
+printf("null pop -> %s\n",a_pop(&a_v, &a_c));
+a_push(&a_v, &a_c, "11");
+printf("push %d\n",a_c);
+printf("%d: %s \n",a_c, a_v[0]);
+a_push(&a_v, &a_c, "22");
+printf("push %d\n",a_c);
+printf("%d: %s %s \n",a_c, a_v[0], a_v[1]);
+printf("===\n");
+
+
+
+char** s = NULL;
+s = realloc(s, ( 1) * sizeof(char*));
+s[0] = NULL;
+
+char* news = "hey";
+s = realloc(s, (2) * sizeof(char*));
+s[1] = news;
+
+s = realloc(s, (3) * sizeof(char*));
+s[2] = NULL;
+
+printf("0: %s\n",s[0]);
+printf("1: %s\n",s[1]);
+printf("2: %s\n",s[2]);
+
+//    0: (null)
+//    1: hey
+//    2: (null)
+
+
+*/
+
+int a_pushNULL(char*** a_v, size_t* a_c) {
+    *a_v = realloc(*a_v, (*a_c + 1) * sizeof(char*));
+    (*a_v)[(*a_c)++] = NULL;
+    return 0;
+}
+
+int a_push(char*** a_v, size_t* a_c, const char* newStr) {
+
+    if (newStr == NULL) {
+        return a_pushNULL(a_v, a_c);;
+    }
+
+    char* copy;
+    char** p;
+    if ( (copy = malloc(strlen(newStr) + 1)) == NULL ) {
+        return 1;
+    }
+    strcpy(copy, newStr);
+    // WARN: proper argv can be realloc'd b/c it cannot be freed
+    if ((p = realloc(*a_v, (*a_c + 1) * sizeof(char*))) == NULL) {
+        // If ptr is NULL, realloc() is identical to a call to malloc() for size bytes
+        free(copy);
+        return 1;
+    }
+    *a_v = p;
+    (*a_v)[(*a_c)++] = copy;
+    return 0;
+}
+
+char* a_pop(char*** a_v, size_t* a_c) {
+    if (a_v == NULL || *a_c <= 0) {
+        return NULL;
+    }
+    int idx = --(*a_c);
+    char* newStr = (*a_v)[idx];
+    char* copy;
+     if ((
+        copy = malloc(strlen(newStr) + 1)) == NULL
+    ) {
+        printf("\n\n!!!!!!!???\n\n");
+        return NULL;
+    }
+    strcpy(copy, newStr);
+    free(newStr);
+    char** p;
+    if (*a_c == 0) {
+        // *a_v = NULL;
+        // return copy;
+        // p = realloc(*a_v, 0);
+        // p = realloc(*a_v, sizeof(char*));
+        p = NULL;
+        free(*a_v);
+    }
+    else if ((p = realloc(*a_v, (*a_c) * sizeof(char*))) == NULL) {
+        printf("\n\n!!!!!!!\n\n");
+        free(copy);
+        return 0;
+    }
+    *a_v = p;
+    // if (newStr == NULL) { // If ptr is a null pointer, no action occurs.
+    // }
+    // https://stackoverflow.com/questions/5666214/how-to-free-c-2d-array
+    // (*a_v)[idx] = NULL;
+    // printf("    pop a_c= %u\n",*a_c);
+    return copy;
+}
+
+char* a_free(char*** a_v, size_t* a_c) {
+    if (a_v != NULL) {
+        free(*a_v);
+        *a_v = NULL;
+    }
+    *a_c = 0;
+    return 0;
+}
+
+void a_print(char** a_v, size_t a_c)
+{
+    if (a_v != NULL)
+        while (a_c--)
+            printf("%s ", *a_v++);
+    printf("\n");
+}
+
+
+
 /* global for the disassembler */
 BI_REC bi_funct[] =  {  /* info to load builtins */
    { "index", bi_index, 2, 2 },
    { "substr", bi_substr, 2, 3 },
+   { "hash",        bi_hash,        0, 1 }, // *
+   { "shm",         bi_shm,         1, 4 }, // *
    { "sin", bi_sin, 1, 1 },
    { "cos", bi_cos, 1, 1 },
    { "atan2", bi_atan2, 2, 2 },
@@ -59,10 +299,13 @@ BI_REC bi_funct[] =  {  /* info to load builtins */
    { "rand", bi_rand, 0, 0 },
    { "srand", bi_srand, 0, 1 },
    { "close", bi_close, 1, 1 },
+   { "spawn",       bi_spawn,       1, 255 }, // *
+   { "popen",       bi_popen,        1, 1 }, // *
    { "system", bi_system, 1, 1 },
    { "toupper", bi_toupper, 1, 1 },
    { "tolower", bi_tolower, 1, 1 },
    { "fflush", bi_fflush, 0, 1 },
+   { "fhash",       bi_fhash,       1, 2 }, // *
    {0,0,0,0}
 } ;
 
@@ -1312,3 +1555,556 @@ bi_gsub(CELL *sp)
 
     return sp ;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// D4
+
+
+unsigned long long hash_u64(const void* buffer, size_t length)
+{
+    unsigned long long const seed = 0;   /* or any other value */
+    unsigned long long const hash = XXH64(buffer, length, seed);
+    // printf("XXH64 b : %s\n", buffer);
+    // printf("XXH64 l : %u\n", length);
+    // printf("XXH64 v : %d\n", hash);
+    // printf("XXH64 v : %o\n", hash);
+    return hash;
+}
+
+unsigned int hash_u32(const void* buffer, size_t length)
+{
+    unsigned int const seed = 0;   /* or any other value */
+    unsigned int const hash = XXH32(buffer, length, seed);
+    // printf("XXH32 b : %s\n", buffer);
+    // printf("XXH32 l : %u\n", length);
+    // printf("XXH32 v : %d\n", hash);
+    // printf("XXH32 v : %u\n", hash);
+    return hash;
+}
+
+
+
+
+
+
+
+// open
+// https://stackoverflow.com/questions/646241/c-run-a-system-command-and-get-output
+// Any streams opened by previous popen() calls in the parent process are closed in the new child process.
+int popen_cmd(char *cmd)
+{
+    FILE *fp;
+    char path[1035];
+
+    /* Open the command for reading. */
+    fp = popen("/bin/ls /etc/", "r");
+    if (fp == NULL) {
+        printf("Failed to run command\n" );
+        exit(1);
+    }
+
+    /* Read the output a line at a time - output it. */
+    while (fgets(path, sizeof(path)-1, fp) != NULL) {
+        printf("%s", path);
+    }
+
+    /* close */
+    pclose(fp);
+    return 0;
+}
+
+CELL *
+bi_popen(CELL *sp)
+{
+#ifdef HAVE_REAL_PIPES
+    int ret_val;
+    // TRACE_FUNC("bi_open", sp);
+    if (sp->type < C_STRING)
+        cast1_to_s(sp);
+    flush_all_output();
+    ret_val = popen_cmd(string(sp)->str);
+    cell_destroy(sp);
+    sp->type = C_DOUBLE;
+    sp->dval = (double) ret_val;
+// #elif defined(MSDOS)
+    // TODO: ...
+    // int retval;
+
+    // if (sp->type < C_STRING)
+    //     cast1_to_s(sp);
+    // retval = DOSexec(string(sp)->str);
+    // free_STRING(string(sp));
+    // sp->type = C_DOUBLE;
+    // sp->dval = (double) retval;
+#else
+    sp = 0;
+#endif
+    // return_CELL("bi_open", sp);
+    return sp ;
+}
+
+// vfork
+// http://poincare.matf.bg.ac.rs/~ivana/courses/ps/sistemi_knjige/pomocno/apue/APUE/0201433079/ch08lev1sec4.html
+
+
+
+
+
+
+// spawn
+// https://www.systutorials.com/37124/a-posix_spawn-example-in-c-to-create-child-process-on-linux/
+// https://www.systutorials.com/docs/linux/man/3p-posix_spawn/
+// http://pubs.opengroup.org/onlinepubs/009695399/functions/posix_spawn.html
+// https://stackoverflow.com/questions/19546756/starting-a-process-using-posix-spawn
+extern char **environ;
+
+
+/* int arg_mask
+        int mask = 1 << 4 | 1 << 3;
+        int idx = 2;
+        int is; 
+        if ((is = mask & (1 << idx++))) {
+            printf("!! %d\n", is);
+        }
+        if ((is = mask & (1 << idx++))) {
+            printf("!! %d\n", is);
+        }
+        if ((is = mask & (1 << idx++))) {
+            printf("!! %d\n", is);
+        }
+        if ((is = mask & (1 << idx++))) {
+            printf("!! %d\n", is);
+        }
+*/
+
+
+char** arg_v = NULL;
+size_t arg_c = 0;
+
+char** ret_v = NULL;
+size_t ret_c = 0;
+
+void arg_free() { a_free(&arg_v, &arg_c); }
+void ret_free() { a_free(&ret_v, &ret_c); }
+
+int arg_pushNULL() { return a_pushNULL(&arg_v, &arg_c); }
+int ret_pushNULL() { return a_pushNULL(&ret_v, &ret_c); }
+
+int arg_pushstr(const char *str) { return a_push(&arg_v, &arg_c, str); }
+int ret_pushstr(const char *str) { return a_push(&ret_v, &ret_c, str); }
+
+int arg_pushcell(const CELL *p) {
+    if (p->type < C_STRING) { cast1_to_s(p); }
+    return arg_pushstr(string(p)->str);
+}
+int ret_pushcell(const CELL *p) {
+    if (p->type < C_STRING) { cast1_to_s(p); }
+    return ret_pushstr(string(p)->str);
+}
+
+int arg_load(CELL *sp){
+    register int argcnt = sp->type;
+    CELL *p;
+    sp -= argcnt;			/* sp points at the cnd string */
+    for (p = sp; argcnt; argcnt--, p++) {
+        if (arg_pushcell(p)) {
+            printf("\n?????\n");
+            return sp;
+        }
+		cell_destroy(p);
+    }
+    return sp;
+}
+
+
+
+
+
+
+
+
+// CELL * bi_spawn(CELL *sp GCC_UNUSED) {
+//     return _bi_spawn(sp);
+// }
+
+// extern char *itoa(int, char *, int);
+/*
+void myprintf(const char *fmt, ...)
+{
+const char *p;
+va_list argp;
+int i;
+char *s;
+char fmtbuf[256];
+
+va_start(argp, fmt);
+
+for(p = fmt; *p != '\0'; p++)
+	{
+	if(*p != '%')
+		{
+		putchar(*p);
+		continue;
+		}
+
+	switch(*++p)
+		{
+		case 'c':
+			i = va_arg(argp, int);
+			putchar(i);
+			break;
+
+		case 'd':
+			i = va_arg(argp, int);
+			s = itoa(i, fmtbuf, 10);
+			fputs(s, stdout);
+			break;
+
+		case 's':
+			s = va_arg(argp, char *);
+			fputs(s, stdout);
+			break;
+
+		case 'x':
+			i = va_arg(argp, int);
+			s = itoa(i, fmtbuf, 16);
+			fputs(s, stdout);
+			break;
+
+		case '%':
+			putchar('%');
+			break;
+		}
+	}
+
+va_end(argp);
+}
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define SEGSIZE 100000
+
+static void shm_usage()
+{
+        fprintf(stderr, "shm - A utility for tinkering with shared memory\n");
+        fprintf(stderr, "\nusage:  shmtool (w)rite <text>\n");
+        fprintf(stderr, "                (r)ead\n");
+        fprintf(stderr, "                (d)elete\n");
+        fprintf(stderr, "                (m)ode change <octal mode>\n");
+        exit(1);
+}
+
+void shm_w(int shmid, char *text) {
+        /* Attach (map) the shared memory segment into the current process */
+        char  *segptr;
+        if((segptr = (char *)shmat(shmid, 0, 0)) == (char *)-1) {
+                perror("shmat");
+                exit(1);
+        }
+        strcpy(segptr, text);
+        shmdt(segptr);
+        // printf("Done...\n");
+}
+
+void shm_r(int shmid) {
+    /* Attach (map) the shared memory segment into the current process */
+    char  *segptr;
+    if((segptr = (char *)shmat(shmid, 0, 0)) == (char *)-1) {
+            perror("shmat");
+            exit(1);
+    }
+    char val[strlen(segptr)];
+    strcpy(val, segptr);
+    shmdt(segptr);
+    ret_pushstr(val);
+    // printf("%s\n", segptr);
+}
+
+void shm_del(int shmid) {
+        shmctl(shmid, IPC_RMID, 0);
+        // printf("Shared memory segment marked for deletion\n");
+}
+
+void shm_modl(int shmid, char *mode) {
+        struct shmid_ds myshmds;
+        /* Get current values for internal data structure */
+        shmctl(shmid, IPC_STAT, &myshmds);
+        /* Display old permissions */
+        // printf("Old permissions were: %o\n", myshmds.shm_perm.mode);
+        /* Convert and load the mode */
+        sscanf(mode, "%o", &myshmds.shm_perm.mode);
+        /* Update the mode */
+        shmctl(shmid, IPC_SET, &myshmds);
+        // printf("New permissions are : %o\n", myshmds.shm_perm.mode);
+}
+
+static int shm_main(int argc, char **argv) {
+        // a_print(argc, argv);
+        key_t key;
+        int   shmid, cntr;
+        if(argc == 1)
+                shm_usage();
+        /* Create unique key via call to ftok() */
+        key = ftok(".", 'S');
+        /* Open the shared memory segment - create if necessary */
+        if((shmid = shmget(key, SEGSIZE, IPC_CREAT|IPC_EXCL|0666)) == -1)
+        {
+                // printf("Shared memory segment exists - opening as client\n");
+                /* Segment probably already exists - try as a client */
+                if((shmid = shmget(key, SEGSIZE, 0)) == -1)
+                {
+                        perror("shmget");
+                        return 1; // exit(1);
+                }
+        }
+        SWITCH (argv[1])
+                CASE ("w")
+                        shm_w(shmid, argv[2]);
+                          break;
+                CASE ("r")
+                        shm_r(shmid);
+                          break;
+                CASE ("d")
+                        shm_del(shmid);
+                          break;
+                CASE ("m")
+                        shm_modl(shmid, argv[3]);
+                          break;
+                DEFAULT
+                        shm_usage();
+        END
+        return 0;
+}
+
+
+
+/* ================================
+https://github.com/ninja-build/ninja/blob/845213a9cd882394d011cb22a0c6cffa39361526/src/util.cc
+*/
+#include <fcntl.h>
+void fd_SetCloseOnExec(int fd) {
+// #ifndef _WIN32 // TODO:
+  int flags = fcntl(fd, F_GETFD);
+  if (flags < 0) {
+    perror("fcntl(F_GETFD)");
+  } else {
+    if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0)
+      perror("fcntl(F_SETFD)");
+  }
+// #else
+//   HANDLE hd = (HANDLE) _get_osfhandle(fd);
+//   if (! SetHandleInformation(hd, HANDLE_FLAG_INHERIT, 0)) {
+//     fprintf(stderr, "SetHandleInformation(): %s", GetLastErrorString().c_str());
+//   }
+// #endif  // ! _WIN32
+}
+
+
+
+
+
+void bi_BEGIN(CELL **sp) {
+    arg_free();
+    ret_free();
+    // char *argv[] = {"/usr/local/bin/bash", "-c", ..., NULL};
+    arg_pushstr("/usr/local/bin/bash");
+    arg_load(*sp);
+    *sp -= (arg_c - 1);
+}
+
+void bi_END(CELL **sp, int status) {
+    if (ret_c == 1) {
+        (*sp)->type = C_STRING ;
+        (*sp)->ptr = (PTR) new_STRING2(ret_v[0], strlen(ret_v[0]) );
+    }
+    else {
+        (*sp)->type = C_DOUBLE;
+        (*sp)->dval = (double) status;
+    }
+    // cell_destroy(sp); TODO:
+}
+
+
+CELL * bi_shm(CELL *sp) {
+    bi_BEGIN(&sp);
+    int status = shm_main(arg_c, arg_v);
+    bi_END(&sp, status);
+    return sp;
+}
+
+CELL * bi_fhash(CELL *sp) {
+    // TRACE_FUNC("bi_fhash", sp);
+
+    // return_CELL("bi_fhash", sp);
+    return sp ;
+}
+
+CELL * bi_hash(CELL *sp) {
+
+    // TRACE_FUNC("bi_hash", sp);
+    printf("bi_hash str : \n");
+    if (sp->type == 0) {
+        printf("\ncellcpy() \n");
+	    cellcpy(sp, field);
+        if (sp->type < C_STRING)
+	    cast1_to_s(sp);
+        // sval = ;
+        // hashed = hash_u32( sval->str, sval->len );
+        // ret_pushstr();
+        // free_STRING(sval);
+        bi_END(&sp, hash_u32( string(sp)->str, string(sp)->len ));
+    }
+    else {
+        bi_BEGIN(&sp);
+        // ret_pushstr();
+        bi_END(&sp, hash_u32( arg_v[1], strlen(arg_v[1]) ));
+    }
+    // return_CELL("bi_hash", sp);
+    return sp ;
+
+}
+
+
+
+/* Flags to be set in the `posix_spawnattr_t'.  */
+// #define POSIX_SPAWN_RESETIDS        0x01
+// #define POSIX_SPAWN_SETPGROUP       0x02
+// #define POSIX_SPAWN_SETSIGDEF       0x04
+// #define POSIX_SPAWN_SETSIGMASK      0x08
+// #define POSIX_SPAWN_SETSCHEDPARAM   0x10
+// #define POSIX_SPAWN_SETSCHEDULER    0x20
+// #ifdef __USE_GNU
+// # define POSIX_SPAWN_USEVFORK       0x40
+// #endif
+CELL * bi_spawn(CELL *sp) {
+
+    bi_BEGIN(&sp);
+    arg_pushNULL();
+    flush_all_output();
+    pid_t pid;
+    posix_spawnattr_t attr;
+
+// #if defined(POSIX_SPAWN_USEVFORK) || defined(__GLIBC__)
+// 	/* Force USEVFORK on GNU libc. If this is undefined, it's probably
+// 	 * because you forgot to define _GNU_SOURCE at the top of this file.
+// 	 */
+// 	printf("\n\nxxxx\n\n");
+// #endif
+
+    int status =
+        posix_spawnattr_init(&attr);
+    if (status != 0) {perror("posix_spawnattr_init");} // strerror(status)
+
+    // const POSIX_SPAWN_USEVFORK = 0x40
+    // short flags = POSIX_SPAWN_USEVFORK;
+    // flags |= POSIX_SPAWN_USEVFORK;
+    status =
+        posix_spawnattr_setflags(&attr, 0x00); // TODO: 0x40 blocks..?
+    if (status != 0) {perror("posix_spawnattr_setflags");} // strerror(err)
+
+    status =
+        posix_spawn(&pid, "/usr/local/bin/bash", NULL, &attr, arg_v, environ);
+
+    // printf("\pid= %i %i\n",pid, (int)pid);
+    if (status == 0) {
+
+        // printf("Child pid: %i\n", pid);
+        if (waitpid(pid, &status, 0) != pid) {
+            err(EXIT_FAILURE, "waitpid()");
+        }
+        if (status != 0) {
+            errx(EXIT_FAILURE, "status code is non-zero");
+        }
+
+
+        // if (waitpid(pid, &status, 0) < 0) {
+        //     printf("Child exited with status %i\n", err);
+        //     status = 0;
+        // } else {
+        //     // perror("waitpid");
+        //     status = 1;
+        // }
+    } else {
+        printf("posix_spawn: %s\n", strerror(status));
+        perror("posix_spawn");
+    }
+
+    status =
+        posix_spawnattr_destroy(&attr);
+    if (status != 0) {perror("posix_spawnattr_destroy");}
+    // Fatal("posix_spawnattr_destroy: %s", strerror(status));
+
+    bi_END(&sp, status);
+    // return_CELL("bi_spawn", sp);
+
+    return sp;
+}
+
+    // sval = do_printf((FILE *) 0, string(sp)->str, (unsigned) argcnt, sp + 1);
+    // free_STRING(string(sp));
+
+    // // printf("Run command: %s\n", cmd);
+    // ;
+
+// #ifdef HAVE_REAL_PIPES
+    // int ret_val;
+    // TRACE_FUNC("bi_spawn", sp);
+    // if (sp->type < C_STRING)
+    //     cast1_to_s(sp);
+    // flush_all_output();
+
+    // ret_val = spawn_cmd(string(sp)->str, 0);
+
+// #elif defined(MSDOS)
+    // TODO: ...
+    // int retval;
+
+    // if (sp->type < C_STRING)
+    //     cast1_to_s(sp);
+    // retval = DOSexec(string(sp)->str);
+    // free_STRING(string(sp));
+    // sp->type = C_DOUBLE;
+    // sp->dval = (double) retval;
+// #else
+    // sp = 0;
+// #endif
+    //

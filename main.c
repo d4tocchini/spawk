@@ -22,9 +22,9 @@ you agree to not name that product mawk.
 #include "code.h"
 #include "files.h"
 
-
 int mawk_state ;		 /* 0 is compiling */
 int exit_code ;
+INST *execution_start = 0 ;
 
 int
 main(int argc, char **argv)

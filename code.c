@@ -31,7 +31,7 @@ CODEBLOCK *main_code_p, *begin_code_p, *end_code_p ;
 INST *begin_start, *main_start, *end_start ;
 unsigned begin_size, main_size ;
 
-INST *execution_start = 0 ;
+// INST *execution_start = 0 ;
 
 
 /* grow the active code */

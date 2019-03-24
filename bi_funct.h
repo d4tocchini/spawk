@@ -57,5 +57,13 @@ CELL * bi_close(CELL *) ;
 CELL * bi_system(CELL *) ;
 CELL * bi_fflush(CELL *) ;
 
+
+CELL *bi_fhash(CELL *);
+CELL *bi_hash(CELL *);
+CELL *bi_shm(CELL *);
+CELL *bi_spawn(CELL *);
+CELL *bi_popen(CELL *);
+
+
 #endif  /* BI_FUNCT_H  */
 

@@ -358,23 +358,23 @@ enlarge_fin_buffer(FIN* fin)
 size_t
 fillbuff(int fd, char* target, size_t size)
 {
-    int r ;
-    size_t entry_size = size ;
+   int r ;
+   size_t entry_size = size ;
 
-    while (size>0) {
-        switch (r = read(fd, target, size)) {
-	    case -1:
-	        errmsg(errno, "read error") ;
-	        mawk_exit(2) ;
+   while (size>0) {
+      switch (r = read(fd, target, size)) {
+	      case -1:
+            errmsg(errno, "read error") ;
+            mawk_exit(2) ;
 
-	    case 0:
-	        goto out ;
+	      case 0:
+            goto out ;
 
-	    default:
-	        target += r ; size -= r ;
-	        break ;
-        }
-    }
+	      default:
+            target += r ; size -= r ;
+            break ;
+      }
+   }
 out :
     return entry_size - size ;
 }
