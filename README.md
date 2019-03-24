@@ -1,10 +1,18 @@
+I copy-pasted awk scripts for years assuming it was just `sed`'s wordy alter-ego.  Suffering from a misfortunate name, confusing landscape of forks and zilch in a crowded world of shiny new open source conf swag, awk is a wonder of an underdog already in your shell.  With a more natural syntax than lua, way less redtape than luajit, and uniquely stream-oriented - awk, specifically mawk, is my general purpose scripting language of choice for the foreseeable future.
+
+[Michael Brennan](https://github.com/mikebrennan000)'s mawk remains today's fastest awk interpreter and you'd be hard pressed to bench a more performant & ergonomic scripting language. 25 years later, [mawk 2.0.0 beta]((https://github.com/mikebrennan000/mawk-2) released with the sort of tumbleweed fanfare characteristic of awk. Michael's [forward to The GNU Awk User’s Guide](https://www.gnu.org/software/gawk/manual/gawk.html#Foreword3) gateways to the multiverse of awks.
+
+This project started as a feature wishlist after using mawk in several real-world projects. The new APIs are early-stage WIP & undocumented, but otherwise this is a swap-in usable awk.
+
+# Original README
+
 This is mawk 1.9.9.x, a beta release for 2.0.0.
 
 I first released mawk 1.0 in 1991 and last released mawk 1.3.3 in 1996.
 (A few people had mawk 1.3.3.1 with nextfile, 1999.)
 
 Why a 25 and 20 year anniversary release?  Because I always knew a
-few things could be done better and design decisions that were right for 
+few things could be done better and design decisions that were right for
 the 90's were wrong for 21st century.
 
 In my absence, there have been other developers that produced mawk 1.3.4-xxx.
