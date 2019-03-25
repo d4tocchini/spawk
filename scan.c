@@ -32,14 +32,23 @@ you agree to not name that product mawk.
 
 
 /* static functions */
-static void  scan_fillbuff(void) ;
-static void  scan_open(void) ;
-static int  slow_next(void) ;
-static void  eat_comment(void) ;
-static void  eat_semi_colon(void) ;
-static double  collect_decimal(int, int *) ;
-static int  collect_string(void) ;
-static int  collect_RE(void) ;
+static void  						scan_fillbuff(void) ;
+static void  						scan_open(void) ;
+static int  						slow_next(void) ;
+static void  						eat_comment(void) ;
+static void  						eat_semi_colon(void) ;
+static double  					    collect_decimal(YYSTYPE *yylval, int, int *) ;
+static int  						collect_string(YYSTYPE *yylval) ;
+static int  						collect_RE(YYSTYPE *yylval) ;
+#define 							COLLECT_DECIMAL(i, ip) \
+										collect_decimal(yylval, i, ip)
+#define 							COLLECT_STRING() \
+										collect_string(yylval)
+#define 							COLLECT_RE() \
+										collect_RE(yylval)
+
+
+
 
 
 /*-----------------------------
@@ -98,7 +107,7 @@ scan_init(const char* cmdline_program)
    if (strnicmp(buffp, "extproc ", 8) == 0)
      eat_comment();
 #endif
-   eat_nl() ;			 /* scan to first token */
+   EAT_NL_NULL ;			 /* scan to first token */
    if (next() == 0)
    {
       /* no program */
@@ -238,7 +247,7 @@ eat_semi_colon(void)
 }
 
 void
-eat_nl()			/* eat all space including newlines */
+eat_nl(YYSTYPE *yylval)			/* eat all space including newlines */
 {
    while (1)
       switch (scan_code[next()])
@@ -273,8 +282,8 @@ eat_nl()			/* eat all space including newlines */
 	       {
 		  un_next() ;
 		  /* can't un_next() twice so deal with it */
-		  yylval.ival = '\\' ;
-		  unexpected_char() ;
+		  yylval->ival = '\\' ;
+		  UNEXPECTED_CHAR() ;
 		  if( ++compile_error_count == MAX_COMPILE_ERRORS )
 		     mawk_exit(2) ;
 		  return ;
@@ -288,8 +297,11 @@ eat_nl()			/* eat all space including newlines */
       }
 }
 
+
 int
-yylex(void)
+yylex (YYSTYPE *yylval)
+// https://www.gnu.org/software/bison/manual/bison.html#Pure-Calling
+// yylex(void)
 {
    register int c ;
 
@@ -311,7 +323,7 @@ reswitch:
 
       case SC_NL:
 	 lineno++ ;
-	 eat_nl() ;
+	 EAT_NL ;
 	 ct_ret(NL) ;
 
       case SC_ESCAPE:
@@ -324,16 +336,16 @@ reswitch:
 
 	 if (c == 0)  ct_ret(EOF) ;
 	 un_next() ;
-	 yylval.ival = '\\' ;
+	 yylval->ival = '\\' ;
 	 ct_ret(UNEXPECTED) ;
 
 
       case SC_SEMI_COLON:
-	 eat_nl() ;
+	 EAT_NL ;
 	 ct_ret(SEMI_COLON) ;
 
       case SC_LBRACE:
-	 eat_nl() ;
+	 EAT_NL ;
 	 brace_cnt++ ;
 	 ct_ret(LBRACE) ;
 
@@ -341,7 +353,7 @@ reswitch:
 	 switch (next())
 	 {
 	    case '+':
-	       yylval.ival = '+' ;
+	       yylval->ival = '+' ;
 	       string_buff[0] =
 		  string_buff[1] = '+' ;
 	       string_buff[2] = 0 ;
@@ -359,7 +371,7 @@ reswitch:
 	 switch (next())
 	 {
 	    case '-':
-	       yylval.ival = '-' ;
+	       yylval->ival = '-' ;
 	       string_buff[0] =
 		  string_buff[1] = '-' ;
 	       string_buff[2] = 0 ;
@@ -374,7 +386,7 @@ reswitch:
 	 }
 
       case SC_COMMA:
-	 eat_nl() ;
+	 EAT_NL ;
 	 ct_ret(COMMA) ;
 
       case SC_MUL:
@@ -398,13 +410,13 @@ reswitch:
 
 		  if (next() == '=') {
 		     un_next() ;
-		     ct_ret(collect_RE()) ;
+		     ct_ret(COLLECT_RE()) ;
 		  }
 	       }
 	    }
 	    while (*++p != -1) ;
 
-	    ct_ret(collect_RE()) ;
+	    ct_ret(COLLECT_RE()) ;
 	 }
 
       case SC_MOD:
@@ -436,7 +448,7 @@ reswitch:
       case SC_MATCH:
 	 string_buff[0] = '~' ;
 	 string_buff[0] = 0 ;
-	 yylval.ival = 1 ;
+	 yylval->ival = 1 ;
 	 ct_ret(MATCH) ;
 
       case SC_EQUAL:
@@ -448,7 +460,7 @@ reswitch:
 	    string_buff[0] = '!' ;
 	    string_buff[1] = '~' ;
 	    string_buff[2] = 0 ;
-	    yylval.ival = 0 ;
+	    yylval->ival = 0 ;
 	    ct_ret(MATCH) ;
 	 }
 	 else if (c == '=')  ct_ret(NEQ) ;
@@ -477,14 +489,14 @@ reswitch:
 	    string_buff[0] = '>' ;
 	    if (next() == '>')
 	    {
-	       yylval.ival = F_APPEND ;
+	       yylval->ival = F_APPEND ;
 	       string_buff[1] = '>' ;
 	       string_buff[2] = 0 ;
 	    }
 	    else
 	    {
 	       un_next() ;
-	       yylval.ival = F_TRUNC ;
+	       yylval->ival = F_TRUNC ;
 	       string_buff[1] = 0 ;
 	    }
 	    return current_token = IO_OUT ;
@@ -495,7 +507,7 @@ reswitch:
       case SC_OR:
 	 if (next() == '|')
 	 {
-	    eat_nl() ;
+	    EAT_NL ;
 	    ct_ret(OR) ;
 	 }
 	 else
@@ -505,7 +517,7 @@ reswitch:
 	    if (print_flag && paren_cnt == 0)
 	    {
 	       print_flag = 0 ;
-	       yylval.ival = PIPE_OUT ;
+	       yylval->ival = PIPE_OUT ;
 	       string_buff[0] = '|' ;
 	       string_buff[1] = 0 ;
 	       ct_ret(IO_OUT) ;
@@ -516,13 +528,13 @@ reswitch:
       case SC_AND:
 	 if (next() == '&')
 	 {
-	    eat_nl() ;
+	    EAT_NL ;
 	    ct_ret(AND) ;
 	 }
 	 else
 	 {
 	    un_next() ;
-	    yylval.ival = '&' ;
+	    yylval->ival = '&' ;
 	    ct_ret(UNEXPECTED) ;
 	 }
 
@@ -551,7 +563,7 @@ reswitch:
 	       physical law -- conservation of semi-colons */
 
 	    if (brace_cnt == 0)	 eat_semi_colon() ;
-	    eat_nl() ;
+	    EAT_NL ;
 	    ct_ret(RBRACE) ;
 	 }
 
@@ -570,19 +582,19 @@ reswitch:
 	    static double double_zero = 0.0 ;
 	    static double double_one = 1.0 ;
 
-	    if ((d = collect_decimal(c, &flag)) == 0.0)
+	    if ((d = COLLECT_DECIMAL(c, &flag)) == 0.0)
 	    {
 	       if (flag)  ct_ret(flag) ;
-	       else  yylval.ptr = (PTR) & double_zero ;
+	       else  yylval->ptr = (PTR) & double_zero ;
 	    }
 	    else if (d == 1.0)
 	    {
-	       yylval.ptr = (PTR) & double_one ;
+	       yylval->ptr = (PTR) & double_one ;
 	    }
 	    else
 	    {
-	       yylval.ptr = (PTR) ZMALLOC(double) ;
-	       *(double *) yylval.ptr = d ;
+	       yylval->ptr = (PTR) ZMALLOC(double) ;
+	       *(double *) yylval->ptr = d ;
 	    }
 	    ct_ret(DOUBLE) ;
 	 }
@@ -601,10 +613,10 @@ reswitch:
 	    }
 
 	    /* compute field address at compile time */
-	    if ((d = collect_decimal(c, &flag)) == 0.0)
+	    if ((d = COLLECT_DECIMAL(c, &flag)) == 0.0)
 	    {
 	       if (flag)  ct_ret(flag) ; /* an error */
-	       else  yylval.cp = &field[0] ;
+	       else  yylval->cp = &field[0] ;
 	    }
 	    else
 	    {
@@ -617,14 +629,14 @@ reswitch:
 		     it will not be executed or da'ed  */
 		  ival = 0 ;
                }
-	       yylval.cp = field_ptr(ival) ;
+	       yylval->cp = field_ptr(ival) ;
 	    }
 
 	    ct_ret(FIELD) ;
 	 }
 
       case SC_DQUOTE:
-	 return current_token = collect_string() ;
+	 return current_token = COLLECT_STRING() ;
 
       case SC_IDCHAR:		/* collect an identifier */
 	 {
@@ -652,12 +664,12 @@ reswitch:
 			zmalloc(sizeof(FBLOCK)) ;
 		     stp->stval.fbp->name = stp->name ;
 		     stp->stval.fbp->code = (INST *) 0 ;
-		     yylval.fbp = stp->stval.fbp ;
+		     yylval->fbp = stp->stval.fbp ;
 		     current_token = FUNCT_ID ;
 		  }
 		  else
 		  {
-		     yylval.stp = stp ;
+		     yylval->stp = stp ;
 		     current_token =
 			current_token == DOLLAR ? D_ID : ID ;
 		  }
@@ -675,7 +687,7 @@ reswitch:
 	       case ST_LOCAL_VAR:
 	       case ST_LOCAL_ARRAY:
 
-		  yylval.stp = stp ;
+		  yylval->stp = stp ;
 		  current_token =
 		     current_token == DOLLAR ? D_ID : ID ;
 		  break ;
@@ -684,13 +696,13 @@ reswitch:
 		  stp->type = ST_ARRAY ;
 		  stp->stval.array = new_ARRAY() ;
 		  load_environ(stp->stval.array) ;
-		  yylval.stp = stp ;
+		  yylval->stp = stp ;
 		  current_token =
 		     current_token == DOLLAR ? D_ID : ID ;
 		  break ;
 
 	       case ST_FUNCT:
-		  yylval.fbp = stp->stval.fbp ;
+		  yylval->fbp = stp->stval.fbp ;
 		  current_token = FUNCT_ID ;
 		  break ;
 
@@ -699,12 +711,12 @@ reswitch:
 		  break ;
 
 	       case ST_BUILTIN:
-		  yylval.bip = stp->stval.bip ;
+		  yylval->bip = stp->stval.bip ;
 		  current_token = BUILTIN ;
 		  break ;
 
 	       case ST_FIELD:
-		  yylval.cp = stp->stval.cp ;
+		  yylval->cp = stp->stval.cp ;
 		  current_token = FIELD ;
 		  break ;
 
@@ -716,7 +728,7 @@ reswitch:
 
 
       case SC_UNEXPECTED:
-	 yylval.ival = c & 0xff ;
+	 yylval->ival = c & 0xff ;
 	 ct_ret(UNEXPECTED) ;
    }
    return 0 ;			 /* never get here make lint happy */
@@ -726,7 +738,7 @@ reswitch:
    Return the value and error conditions by reference */
 
 static double
-collect_decimal(int c, int* flag)
+collect_decimal(YYSTYPE *yylval, int c, int* flag)
 {
    register unsigned char *p = (unsigned char *) string_buff + 1 ;
    unsigned char *endp ;
@@ -740,7 +752,7 @@ collect_decimal(int c, int* flag)
       if (scan_code[*p++ = next()] != SC_DIGIT)
       {
 	 *flag = UNEXPECTED ;
-	 yylval.ival = '.' ;
+	 yylval->ival = '.' ;
 	 return 0.0 ;
       }
    }
@@ -931,7 +943,7 @@ size_t rm_escape(char* s)
 }
 
 static int
-collect_string(void)
+collect_string(YYSTYPE *yylval)
 {
    register unsigned char *p = (unsigned char *) string_buff ;
    int c ;
@@ -980,14 +992,15 @@ out:
         if (e_flag) {
             len = rm_escape(string_buff) ;
 	}
-        yylval.ptr = new_STRING2(string_buff, len) ;
+        yylval->ptr = new_STRING2(string_buff, len) ;
     }
     return STRING_ ;
 }
 
 
 /* bad character class in an RE */
-static void box_error(unsigned char* p)
+static void                     box_error(
+                                    unsigned char* p)
 {
     *p = 0 ;
     compile_error(
@@ -997,7 +1010,8 @@ static void box_error(unsigned char* p)
 }
 
 /* seen [:   collect to :] */
-static unsigned char* collect_named_box(unsigned char* p)
+static unsigned char*           collect_named_box(
+                                    unsigned char* p)
 {
     unsigned c ;
     while(1) {
@@ -1030,7 +1044,8 @@ static unsigned char* collect_named_box(unsigned char* p)
 }
 
 /* seen [ collect to ] */
-unsigned char* collect_RE_box(unsigned char* p)
+unsigned char*                  collect_RE_box(
+                                    unsigned char* p)
 {
     unsigned c ;
     unsigned char* end = (unsigned char*) string_buff_end ;
@@ -1105,7 +1120,8 @@ unsigned char* collect_RE_box(unsigned char* p)
     }
 }
 
-static void runaway_RE(unsigned char* p)
+static void                     runaway_RE(
+                                    unsigned char* p)
 {
     *p = 0 ;
     compile_error("runaway regular expression /%.10s ...",
@@ -1122,8 +1138,8 @@ static void runaway_RE(unsigned char* p)
 
     also removes  "\\\n" (escaped nl) so it doesn't go to REcompile()
 */
-static int
-collect_RE(void)
+static int	                    collect_RE(
+                                    YYSTYPE *yylval)
 {
     unsigned char *p = (unsigned char *) string_buff ;
     unsigned  c ;
@@ -1138,7 +1154,7 @@ collect_RE(void)
 	    case '/':  /* done */
 	        *p = 0 ;
                 sval = new_STRING(string_buff) ;
-                yylval.ptr = re_compile(sval) ;
+                yylval->ptr = re_compile(sval) ;
                 free_STRING(sval) ;
                 return RE ;
 
@@ -1174,3 +1190,193 @@ collect_RE(void)
 }
 
 
+
+
+
+
+
+
+static struct                   token_str  {
+    int                             token ;
+    const                           char *str ;
+                                } token_str[] = {
+                                    { EOF , "end of file" },
+                                    { NL , "end of line"},
+                                    { SEMI_COLON , ";" },
+                                    { LBRACE , "{" },
+                                    { RBRACE , "}" },
+                                    { SC_FAKE_SEMI_COLON, "}"},
+                                    { LPAREN , "(" },
+                                    { RPAREN , ")" },
+                                    { LBOX , "["},
+                                    { RBOX , "]"},
+                                    { QMARK , "?"},
+                                    { COLON , ":"},
+                                    { OR, "||"},
+                                    { AND, "&&"},
+                                    { ASSIGN , "=" },
+                                    { ADD_ASG, "+="},
+                                    { SUB_ASG, "-="},
+                                    { MUL_ASG, "*="},
+                                    { DIV_ASG, "/="},
+                                    { MOD_ASG, "%="},
+                                    { POW_ASG, "^="},
+                                    { EQ  , "==" },
+                                    { NEQ , "!="},
+                                    { LT, "<" },
+                                    { LTE, "<=" },
+                                    { GT, ">"},
+                                    { GTE, ">=" },
+                                    { PLUS , "+" },
+                                    { MINUS, "-" },
+                                    { MUL , "*" },
+                                    { DIV, "/"  },
+                                    { MOD, "%" },
+                                    { POW, "^" },
+                                    { NOT, "!" },
+                                    { COMMA, "," },
+                                    { IO_IN, "<" },
+                                    { PIPE, "|" },
+                                    { DOLLAR, "$" },
+                                    { FIELD, "$" },
+                                    { 0, 0}
+} ;
+
+static int                      token_in_string_buff[] = {
+                                    MATCH, 
+                                    INC_or_DEC, 
+                                    DOUBLE, 
+                                    STRING_, 
+                                    ID, 
+                                    FUNCT_ID,
+                                    BUILTIN, 
+                                    IO_OUT, 
+                                    0 
+                                } ;
+
+/* if paren_cnt >0 and we see one of these, we are missing a ')' */
+static int                      missing_rparen[] = { 
+                                    EOF, 
+                                    NL, 
+                                    SEMI_COLON, 
+                                    SC_FAKE_SEMI_COLON, 
+                                    RBRACE, 
+                                    0 
+                                } ;
+
+/* ditto for '}' */
+static int                      missing_rbrace[] = { 
+                                    EOF, 
+                                    BEGIN, 
+                                    END, 
+                                    0 
+                                } ;
+
+void 							_mawk_unexpected_char(
+									YYSTYPE *yylval)
+{ 
+    int c = yylval->ival ;
+    fprintf(stderr, "%s: %u: ", progname, token_lineno) ;
+    if ( c > ' ' && c < 127 )
+        fprintf(stderr, "unexpected character '%c'\n" , c) ;
+    else
+        fprintf(stderr, "unexpected character 0x%02x\n" , c) ;
+}
+
+static void                     _missing_line(
+                                    int c, 
+                                    const char* n , 
+                                    int ln)
+{ 
+    const char *s0, *s1 ;
+    if ( pfile_name ) { 
+        s0 = pfile_name ; 
+        s1 = ": " ; 
+    }
+    else 
+        s0 = s1 = "" ;
+    errmsg(0, "%s%sline %u: missing %c near %s" ,s0, s1, ln, c, n) ;
+}
+
+
+
+void 							_mawk_yyerror(
+                                    YYSTYPE *yylval, 
+									const char* s)
+  /* we don't use s for input,
+  (yacc and bison force this).
+  We use s as a var to keep the compiler off our back */
+{
+  const struct token_str *p ;
+  const int *ip ;
+
+  s =  0 ;
+
+  for ( p = token_str ; p->token ; p++ ) {
+      if (current_token == p->token ) {
+      	s = p->str ;
+	  		break ;
+      }
+  }
+
+  if ( !s ) {
+      unsigned i = 0 ;
+      int tok ;
+      while ((tok = token_in_string_buff[i])) {
+         if (current_token == tok) {
+	      	s = string_buff ;
+	      	break ; /* while */
+	  		}
+	  		i++ ;
+      }
+  }
+
+  if ( !s )  /* search the keywords */
+         s = find_kw_str(current_token) ;
+
+  if ( s ) {
+    if ( paren_cnt )
+        for( ip = missing_rparen ; *ip ; ip++)
+            if ( *ip == current_token ) { 
+                _missing_line(')', s, token_lineno) ;
+                paren_cnt = 0 ;
+                goto done ;
+            }
+        if ( brace_cnt )
+            for( ip = missing_rbrace ; *ip ; ip++)
+                if ( *ip == current_token ) { 
+                    _missing_line('}', s, token_lineno) ;
+                    brace_cnt = 0 ;
+                    goto done ;
+                }
+
+    compile_error("syntax error at or near %s", s) ;
+  }
+  else  /* special cases */
+  switch ( current_token )
+  {
+    case UNEXPECTED :
+            UNEXPECTED_CHAR() ;
+            goto done ;
+
+    case BAD_DECIMAL :
+            compile_error(
+              "syntax error in decimal constant %s",
+              string_buff ) ;
+            break ;
+
+    case RE :
+            compile_error(
+            "syntax error at or near /%s/",
+            string_buff ) ;
+            break ;
+
+    default :
+            compile_error("syntax error") ;
+            break ;
+  }
+  return ;
+
+done :
+  if ( ++compile_error_count == MAX_COMPILE_ERRORS ) mawk_exit(2) ;
+}

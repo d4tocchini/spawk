@@ -13,6 +13,8 @@ If you import elements of this code into another product, you agree to
 not name that product mawk.
 ********************************************/
 
+/* make parser reentrant */
+%define api.pure full
 
 %{
 #include <stdio.h>
@@ -25,13 +27,14 @@ not name that product mawk.
 #include "jmp.h"
 #include "field.h"
 #include "files.h"
+#include "scan.h"
 #include "printf.h"
 
 
 #define  YYMAXDEPTH	200
 
 
-extern void   eat_nl(void) ;
+extern void   eat_nl(YYSTYPE *yylval) ;
 static void   resize_fblock(FBLOCK *) ;
 static void   switch_code_to_main(void) ;
 static void   code_array(SYMTAB *) ;
@@ -548,7 +551,7 @@ pr_direction : /* empty */
 /*  IF and IF-ELSE */
 
 if_front :  IF LPAREN expr RPAREN
-            {  $$ = $3 ; eat_nl() ; code_jmp(_JZ, (INST*)0) ; }
+            {  $$ = $3 ; EAT_NL_ ; code_jmp(_JZ, (INST*)0) ; }
          ;
 
 /* if_statement */
@@ -556,7 +559,7 @@ statement : if_front statement
                 { patch_jmp( code_ptr ) ;  }
               ;
 
-else    :  ELSE { eat_nl() ; code_jmp(_JMP, (INST*)0) ; }
+else    :  ELSE { EAT_NL_ ; code_jmp(_JMP, (INST*)0) ; }
         ;
 
 /* if_else_statement */
@@ -569,7 +572,7 @@ statement :  if_front statement else statement
 /*  LOOPS   */
 
 do      :  DO
-        { eat_nl() ; BC_new() ; }
+        { EAT_NL_ ; BC_new() ; }
         ;
 
 /* do_statement */
@@ -580,7 +583,7 @@ statement : do statement WHILE LPAREN expr RPAREN separator
         ;
 
 while_front :  WHILE LPAREN expr RPAREN
-                { eat_nl() ; BC_new() ;
+                { EAT_NL_ ; BC_new() ;
                   $$ = $3 ;
 
                   /* check if const expression */
@@ -673,13 +676,13 @@ for2    :  SEMI_COLON   { $$ = code_offset ; }
         ;
 
 for3    :  RPAREN
-           { eat_nl() ; BC_new() ;
+           { EAT_NL_ ; BC_new() ;
 	     code_push((INST*)0,0, scope, active_funct) ;
 	   }
         |  expr RPAREN
            { INST *p1 = CDP($1) ;
 
-	     eat_nl() ; BC_new() ;
+	     EAT_NL_ ; BC_new() ;
              code1(_POP) ;
              code_push(p1, code_ptr - p1, scope, active_funct) ;
              code_ptr -= code_ptr - p1 ;
@@ -767,7 +770,7 @@ statement :  DELETE  ID mark LBOX args RBOX separator
 /*  for ( i in A )  statement */
 
 array_loop_front :  FOR LPAREN ID IN ID RPAREN
-                    { eat_nl() ; BC_new() ;
+                    { EAT_NL_ ; BC_new() ;
                       $$ = code_offset ;
 
                       check_var($3) ;
@@ -1091,7 +1094,7 @@ function_def  :  funct_start  block
 
 
 funct_start   :  funct_head  LPAREN  f_arglist  RPAREN
-                 { eat_nl() ;
+                 { EAT_NL_ ;
                    scope = SCOPE_FUNCT ;
                    active_funct = $1 ;
                    *main_code_p = active_code ;

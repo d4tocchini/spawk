@@ -2,7 +2,7 @@
 
 /* scancode.c */
 /* generated from makescan.c */
-/* Sun Jul 24 15:02:09 PDT 2016 */
+/* Mon Mar 25 00:12:25 PDT 2019 */
 
 
 int scan_code[256] = {

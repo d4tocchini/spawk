@@ -210,7 +210,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 64 "parse.y" /* yacc.c:1927  */
+#line 67 "parse.y" /* yacc.c:1927  */
 
 CELL *cp ;
 SYMTAB *stp ;
@@ -232,7 +232,6 @@ typedef union YYSTYPE YYSTYPE;
 #endif
 
 
-extern YYSTYPE yylval;
 
 int yyparse (void);
 

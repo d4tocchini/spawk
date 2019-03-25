@@ -21,162 +21,11 @@ you agree to not name that product mawk.
 #include  "bi_vars.h"
 
 static void  rt_where(void) ;
-static void  missing(int, const char *, int) ;
 static const char* type_to_str(int) ;
 
 
 /* for run time error messages only */
 unsigned rt_nr , rt_fnr ;
-
-static struct token_str  {
-    int token ;
-    const char *str ;
-}  token_str[] = {
-    { EOF , "end of file" },
-    { NL , "end of line"},
-    { SEMI_COLON , ";" },
-    { LBRACE , "{" },
-    { RBRACE , "}" },
-    { SC_FAKE_SEMI_COLON, "}"},
-    { LPAREN , "(" },
-    { RPAREN , ")" },
-    { LBOX , "["},
-    { RBOX , "]"},
-    { QMARK , "?"},
-    { COLON , ":"},
-    { OR, "||"},
-    { AND, "&&"},
-    { ASSIGN , "=" },
-    { ADD_ASG, "+="},
-    { SUB_ASG, "-="},
-    { MUL_ASG, "*="},
-    { DIV_ASG, "/="},
-    { MOD_ASG, "%="},
-    { POW_ASG, "^="},
-    { EQ  , "==" },
-    { NEQ , "!="},
-    { LT, "<" },
-    { LTE, "<=" },
-    { GT, ">"},
-    { GTE, ">=" },
-    { PLUS , "+" },
-    { MINUS, "-" },
-    { MUL , "*" },
-    { DIV, "/"  },
-    { MOD, "%" },
-    { POW, "^" },
-    { NOT, "!" },
-    { COMMA, "," },
-    { IO_IN, "<" },
-    { PIPE, "|" },
-    { DOLLAR, "$" },
-    { FIELD, "$" },
-    { 0, 0}
-} ;
-
-static int token_in_string_buff[] = {
-    MATCH, INC_or_DEC , DOUBLE  , STRING_  , ID  , FUNCT_ID  ,
-    BUILTIN  , IO_OUT , 0 } ;
-
-/* if paren_cnt >0 and we see one of these, we are missing a ')' */
-static int missing_rparen[] =
-{ EOF, NL, SEMI_COLON, SC_FAKE_SEMI_COLON, RBRACE, 0 } ;
-
-/* ditto for '}' */
-static int missing_rbrace[] =
-{ EOF, BEGIN, END , 0 } ;
-
-static void missing(int c, const char* n , int ln)
-{ const char *s0, *s1 ;
-
-  if ( pfile_name )
-  { s0 = pfile_name ; s1 = ": " ; }
-  else s0 = s1 = "" ;
-
-  errmsg(0, "%s%sline %u: missing %c near %s" ,s0, s1, ln, c, n) ;
-}
-
-void  yyerror(const char* s)
-  /* we don't use s for input,
-  (yacc and bison force this).
-  We use s as a var to keep the compiler off our back */
-{
-  struct token_str *p ;
-  int *ip ;
-
-  s =  0 ;
-
-  for ( p = token_str ; p->token ; p++ ) {
-      if (current_token == p->token ) {
-          s = p->str ;
-	  break ;
-      }
-  }
-
-  if (!s) {
-      unsigned i = 0 ;
-      int tok ;
-      while((tok = token_in_string_buff[i])) {
-          if (current_token == tok) {
-	      s = string_buff ;
-	      break ; /* while */
-	  }
-	  i++ ;
-      }
-  }
-
-  if ( ! s )  /* search the keywords */
-         s = find_kw_str(current_token) ;
-
-  if ( s )
-  {
-    if ( paren_cnt )
-        for( ip = missing_rparen ; *ip ; ip++)
-          if ( *ip == current_token )
-          { missing(')', s, token_lineno) ;
-            paren_cnt = 0 ;
-            goto done ;
-          }
-
-    if ( brace_cnt )
-        for( ip = missing_rbrace ; *ip ; ip++)
-          if ( *ip == current_token )
-          { missing('}', s, token_lineno) ;
-            brace_cnt = 0 ;
-            goto done ;
-          }
-
-    compile_error("syntax error at or near %s", s) ;
-
-  }
-  else  /* special cases */
-  switch ( current_token )
-  {
-    case UNEXPECTED :
-            unexpected_char() ;
-            goto done ;
-
-    case BAD_DECIMAL :
-            compile_error(
-              "syntax error in decimal constant %s",
-              string_buff ) ;
-            break ;
-
-    case RE :
-            compile_error(
-            "syntax error at or near /%s/",
-            string_buff ) ;
-            break ;
-
-    default :
-            compile_error("syntax error") ;
-            break ;
-  }
-  return ;
-
-done :
-  if ( ++compile_error_count == MAX_COMPILE_ERRORS ) mawk_exit(2) ;
-}
 
 
 /* generic error message with a hook into the system error
@@ -300,16 +149,6 @@ void rt_overflow(const char* s, unsigned size)
     mawk_exit(2) ;
 }
 
-void
-unexpected_char(void)
-{ int c = yylval.ival ;
-
-  fprintf(stderr, "%s: %u: ", progname, token_lineno) ;
-  if ( c > ' ' && c < 127 )
-      fprintf(stderr, "unexpected character '%c'\n" , c) ;
-  else
-      fprintf(stderr, "unexpected character 0x%02x\n" , c) ;
-}
 
 static const char*
 type_to_str( int type )

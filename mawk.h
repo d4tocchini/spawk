@@ -30,6 +30,7 @@ typedef int Bool ;
 #include <string.h>
 #include <errno.h>
 #include "types.h"
+#include "scan.h"
 
 #ifdef   DEBUG
 #define  YYDEBUG  1
@@ -119,12 +120,6 @@ char * str_str(const char*, size_t , const char*, size_t) ;
 size_t rm_escape(char *) ;
 char * re_pos_match(const char *, size_t ,PTR, size_t*, Bool) ;
 int    binmode(void) ;
-
-void  parse(void) ;
-int   yylex(void) ;
-int  yyparse(void) ;
-void yyerror(const char *) ;
-void scan_cleanup(void) ;
 
 void bozo(const char*) ;
 void errmsg(int, const char*, ...) ;
