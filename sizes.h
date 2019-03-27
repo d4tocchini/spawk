@@ -18,7 +18,7 @@ you agree to not name that product mawk.
 #ifndef  SIZES_H
 #define  SIZES_H
 
-#define  MAX__INT   0x7fffffff 
+#define  MAX__INT       0x7fffffff
 
 
 #define EVAL_STACK_SIZE  256	/* initial size , can grow */
@@ -27,8 +27,8 @@ you agree to not name that product mawk.
  * FBANK_SZ, the number of fields at startup, must be a power of 2.
  *
  */
-#define  FBANK_SZ	1024
-#define  FB_SHIFT	  10	/* lg(FBANK_SZ) */
+#define  FBANK_SZ	      1024
+#define  FB_SHIFT	      10	/* lg(FBANK_SZ) */
 
 /*
  * initial size of sprintf buffer
@@ -40,7 +40,7 @@ you agree to not name that product mawk.
   /* starting buffer size for input files, grows if
      necessary */
 
-#define  HASH_PRIME  113
+#define  HASH_PRIME     113
 
 #define  MAX_COMPILE_ERRORS  5	/* quit if more than 4 errors */
 

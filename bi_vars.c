@@ -13,8 +13,6 @@ If you import elements of this code into another product,
 you agree to not name that product mawk.
 ********************************************/
 
-
-
 /* bi_vars.c */
 
 #include "mawk.h"
@@ -25,60 +23,62 @@ you agree to not name that product mawk.
 #include "memory.h"
 
 /* the builtin variables */
-CELL  bi_vars[NUM_BI_VAR] ;
+CELL bi_vars[NUM_BI_VAR];
 
 /* the order here must match the order in bi_vars.h */
 
-static const char *bi_var_names[NUM_BI_VAR] = {
-"NR" ,
-"FNR" ,
-"ARGC" ,
-"FILENAME" ,
-"OFS" ,
-"ORS" ,
-"RLENGTH" ,
-"RSTART" ,
-"SUBSEP"
+static const char * bi_var_names[NUM_BI_VAR] = {
+    "NR",
+    "FNR",
+    "ARGC",
+    "FILENAME",
+    "OFS",
+    "ORS",
+    "RLENGTH",
+    "RSTART",
+    "SUBSEP"
 #if MSDOS
-, "BINMODE"
+    ,
+    "BINMODE"
 #endif
-} ;
+};
 
 /* insert the builtin vars in the hash table */
 
-void  bi_vars_init(void)
-{ register int i ;
-  register SYMTAB *s ;
+void
+bi_vars_init( void )
+{
+    register int      i;
+    register SYMTAB * s;
 
+    for ( i = 0; i < NUM_BI_VAR; i++ ) {
+        s           = insert( bi_var_names[i] );
+        s->type     = i <= 1 ? ST_NR : ST_VAR;
+        s->stval.cp = bi_vars + i;
+        /* bi_vars[i].type = 0 which is C_NOINIT */
+    }
 
-  for ( i = 0 ; i < NUM_BI_VAR ; i++ )
-  { s = insert( bi_var_names[i] ) ;
-    s->type = i <= 1 ? ST_NR : ST_VAR ;
-    s->stval.cp = bi_vars + i ;
-    /* bi_vars[i].type = 0 which is C_NOINIT */
-  }
+    s       = insert( "ENVIRON" );
+    s->type = ST_ENV;
 
-  s = insert("ENVIRON") ;
-  s->type = ST_ENV ;
+    /* set defaults */
 
-  /* set defaults */
+    FILENAME->type = C_STRING;
+    FILENAME->ptr  = (PTR)new_STRING( "" );
 
-  FILENAME->type = C_STRING ;
-  FILENAME->ptr = (PTR) new_STRING( "" ) ;
+    OFS->type = C_STRING;
+    OFS->ptr  = (PTR)new_STRING( " " );
 
-  OFS->type = C_STRING ;
-  OFS->ptr = (PTR) new_STRING( " " ) ;
+    ORS->type = C_STRING;
+    ORS->ptr  = (PTR)new_STRING( "\n" );
 
-  ORS->type = C_STRING ;
-  ORS->ptr = (PTR) new_STRING( "\n" ) ;
+    SUBSEP->type = C_STRING;
+    SUBSEP->ptr  = (PTR)new_STRING( "\034" );
 
-  SUBSEP->type = C_STRING ;
-  SUBSEP->ptr =  (PTR) new_STRING( "\034" ) ;
+    NR->type = FNR->type = C_DOUBLE;
+    /* dval is already 0.0 */
 
-  NR->type = FNR->type = C_DOUBLE ;
-  /* dval is already 0.0 */
-
-#if  MSDOS
-  BINMODE->type = C_DOUBLE ;
+#if MSDOS
+    BINMODE->type = C_DOUBLE;
 #endif
 }

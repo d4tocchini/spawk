@@ -13,57 +13,52 @@ If you import elements of this code into another product,
 you agree to not name that product mawk.
 ********************************************/
 
-
-
-#ifndef  BI_FUNCT_H
-#define  BI_FUNCT_H  1
+#ifndef BI_FUNCT_H
+#define BI_FUNCT_H 1
 
 #include "symtype.h"
 
-extern BI_REC  bi_funct[] ;
+extern BI_REC bi_funct[];
 
-void  bi_init(void) ;
+void bi_init( void );
 
-CELL * bi_print(CELL *) ;
-CELL * bi_printf(CELL *) ;
-CELL * bi_printf1(CELL *) ;
-CELL * bi_length(CELL *) ;
-CELL* bi_alength(CELL*) ;   /* length/size of an array */
-CELL * bi_index(CELL *) ;
-CELL * bi_substr(CELL *) ;
-CELL * bi_sprintf(CELL *) ;
-CELL * bi_sprintf1(CELL *) ;
-CELL * bi_split(CELL *) ;
-CELL * bi_match(CELL *) ;
-CELL * bi_getline(CELL *) ;
-CELL * bi_sub(CELL *) ;
-CELL * bi_gsub(CELL *) ;
-CELL * bi_toupper(CELL*) ;
-CELL * bi_tolower(CELL*) ;
+CELL * bi_print( CELL * );
+CELL * bi_printf( CELL * );
+CELL * bi_printf1( CELL * );
+CELL * bi_length( CELL * );
+CELL * bi_alength( CELL * ); /* length/size of an array */
+CELL * bi_index( CELL * );
+CELL * bi_substr( CELL * );
+CELL * bi_sprintf( CELL * );
+CELL * bi_sprintf1( CELL * );
+CELL * bi_split( CELL * );
+CELL * bi_match( CELL * );
+CELL * bi_getline( CELL * );
+CELL * bi_sub( CELL * );
+CELL * bi_gsub( CELL * );
+CELL * bi_toupper( CELL * );
+CELL * bi_tolower( CELL * );
 
 /* builtin arith functions */
-CELL * bi_sin(CELL *) ;
-CELL * bi_cos(CELL *) ;
-CELL * bi_atan2(CELL *) ;
-CELL * bi_log(CELL *) ;
-CELL * bi_exp(CELL *) ;
-CELL * bi_int(CELL *) ;
-CELL * bi_sqrt(CELL *) ;
-CELL * bi_srand(CELL *) ;
-CELL * bi_rand(CELL *) ;
+CELL * bi_sin( CELL * );
+CELL * bi_cos( CELL * );
+CELL * bi_atan2( CELL * );
+CELL * bi_log( CELL * );
+CELL * bi_exp( CELL * );
+CELL * bi_int( CELL * );
+CELL * bi_sqrt( CELL * );
+CELL * bi_srand( CELL * );
+CELL * bi_rand( CELL * );
 
 /* other builtins */
-CELL * bi_close(CELL *) ;
-CELL * bi_system(CELL *) ;
-CELL * bi_fflush(CELL *) ;
+CELL * bi_close( CELL * );
+CELL * bi_system( CELL * );
+CELL * bi_fflush( CELL * );
 
+CELL * bi_fhash( CELL * );
+CELL * bi_hash( CELL * );
+CELL * bi_shm( CELL * );
+CELL * bi_spawn( CELL * );
+CELL * bi_popen( CELL * );
 
-CELL *bi_fhash(CELL *);
-CELL *bi_hash(CELL *);
-CELL *bi_shm(CELL *);
-CELL *bi_spawn(CELL *);
-CELL *bi_popen(CELL *);
-
-
-#endif  /* BI_FUNCT_H  */
-
+#endif /* BI_FUNCT_H  */

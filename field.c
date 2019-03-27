@@ -25,16 +25,16 @@ you agree to not name that product mawk.
 #include "repl.h"
 #include "regexp.h"
 
-STRING* check_convfmt(const STRING*) ;
+STRING * check_convfmt( const STRING * );
 
 /* initial fields and pseudo fields,
     most programs only need these */
 CELL field[FBANK_SZ + NUM_PFIELDS];
 /* hold banks of more fields if needed */
-CELL **fbankv;
+CELL ** fbankv;
 
 /* fbankv grows in chunks */
-#define FBANKV_CHUNK_SIZE    1024
+#define FBANKV_CHUNK_SIZE 1024
 static size_t fbankv_num_chunks;
 
 /* make fbankv big enough to hold field CELL $i
@@ -44,25 +44,26 @@ static size_t fbankv_num_chunks;
    makes fbankv big enough to hold the fbank that will hold $i
 */
 static void
-allocate_fbankv(int i)
+allocate_fbankv( int i )
 {
-    if (i == 0) {
-	size_t sz = FBANKV_CHUNK_SIZE * sizeof(CELL *);
-	fbankv_num_chunks = 1;
-	fbankv = (CELL **) emalloc(sz);
-	memset(fbankv, 0, sz);
-	fbankv[0] = field;
-    } else {
-	size_t u = (size_t) i + 1;
-	size_t chunks = (u / (FBANK_SZ * FBANKV_CHUNK_SIZE)) + 1;
-	if (chunks > fbankv_num_chunks) {
-	    size_t old_size = fbankv_num_chunks * FBANKV_CHUNK_SIZE;
-	    size_t new_size = chunks * FBANKV_CHUNK_SIZE;
-	    fbankv = (CELL **)erealloc(fbankv, new_size * sizeof(CELL *));
+    if ( i == 0 ) {
+        size_t sz         = FBANKV_CHUNK_SIZE * sizeof( CELL * );
+        fbankv_num_chunks = 1;
+        fbankv            = (CELL **)emalloc( sz );
+        memset( fbankv, 0, sz );
+        fbankv[0] = field;
+    }
+    else {
+        size_t u      = (size_t)i + 1;
+        size_t chunks = ( u / ( FBANK_SZ * FBANKV_CHUNK_SIZE ) ) + 1;
+        if ( chunks > fbankv_num_chunks ) {
+            size_t old_size = fbankv_num_chunks * FBANKV_CHUNK_SIZE;
+            size_t new_size = chunks * FBANKV_CHUNK_SIZE;
+            fbankv          = (CELL **)erealloc( fbankv, new_size * sizeof( CELL * ) );
 
-	    memset(&fbankv[old_size], 0, (new_size - old_size) * sizeof(CELL *));
-	    fbankv_num_chunks = chunks;
-	}
+            memset( &fbankv[old_size], 0, ( new_size - old_size ) * sizeof( CELL * ) );
+            fbankv_num_chunks = chunks;
+        }
     }
 }
 
@@ -82,142 +83,143 @@ static int max_field = FBANK_SZ - 1;
     cell_destroyed.
 */
 
-static void build_field0(void);
+static void build_field0( void );
 
 /* a description of how to split based on RS.
    If RS is changed, so is rs_shadow */
-SEPARATOR rs_shadow =
-{
+SEPARATOR rs_shadow = {
     SEP_CHAR, '\n', NULL
 };
 /* a splitting CELL version of FS */
-CELL fs_shadow =
-{
+CELL fs_shadow = {
     C_SPACE, 0, 0.0
 };
 int nf;
- /* nf holds the true value of NF.  If nf < 0 , then
+/* nf holds the true value of NF.  If nf < 0 , then
     NF has not been computed, i.e., $0 has not been split
   */
 
 static void
-set_rs_shadow(void)
+set_rs_shadow( void )
 {
-    CELL c;
-    STRING *sval;
-    const char *s;
-    size_t len;
+    CELL         c;
+    STRING *     sval;
+    const char * s;
+    size_t       len;
 
-    if (posix_space_flag && mawk_state == EXECUTION)
-	scan_code['\n'] = SC_UNEXPECTED;
+    if ( posix_space_flag && mawk_state == EXECUTION )
+        scan_code['\n'] = SC_UNEXPECTED;
 
-    if (rs_shadow.type == SEP_STR) {
-	free_STRING((STRING *) rs_shadow.ptr);
+    if ( rs_shadow.type == SEP_STR ) {
+        free_STRING( (STRING *)rs_shadow.ptr );
     }
 
-    cast_for_split(cellcpy(&c, RS));
-    switch (c.type) {
-    case C_RE:
-	if ((s = is_string_split(c.ptr, &len))) {
-	    if (len == 1) {
-		rs_shadow.type = SEP_CHAR;
-		rs_shadow.c = s[0];
-	    } else {
-		rs_shadow.type = SEP_STR;
-		rs_shadow.ptr = (PTR) new_STRING2(s,len);
-	    }
-	} else {
-	    rs_shadow.type = SEP_RE;
-	    rs_shadow.ptr = c.ptr;
-	}
-	break;
+    cast_for_split( cellcpy( &c, RS ) );
+    switch ( c.type ) {
+        case C_RE:
+            if ( ( s = is_string_split( c.ptr, &len ) ) ) {
+                if ( len == 1 ) {
+                    rs_shadow.type = SEP_CHAR;
+                    rs_shadow.c    = s[0];
+                }
+                else {
+                    rs_shadow.type = SEP_STR;
+                    rs_shadow.ptr  = (PTR)new_STRING2( s, len );
+                }
+            }
+            else {
+                rs_shadow.type = SEP_RE;
+                rs_shadow.ptr  = c.ptr;
+            }
+            break;
 
-    case C_SPACE:
-	rs_shadow.type = SEP_CHAR;
-	rs_shadow.c = ' ';
-	break;
+        case C_SPACE:
+            rs_shadow.type = SEP_CHAR;
+            rs_shadow.c    = ' ';
+            break;
 
-    case C_SNULL:		/* RS becomes one or more blank lines */
-	if (mawk_state == EXECUTION)
-	    scan_code['\n'] = SC_SPACE;
-	rs_shadow.type = SEP_MLR;
-	sval = new_STRING("\n\n+");
-	rs_shadow.ptr = re_compile(sval);
-	free_STRING(sval);
-	break;
+        case C_SNULL: /* RS becomes one or more blank lines */
+            if ( mawk_state == EXECUTION )
+                scan_code['\n'] = SC_SPACE;
+            rs_shadow.type = SEP_MLR;
+            sval           = new_STRING( "\n\n+" );
+            rs_shadow.ptr  = re_compile( sval );
+            free_STRING( sval );
+            break;
 
-    case C_STRING:
-	/*
+        case C_STRING:
+            /*
 	 * Check for special case where we retained the cell as a string,
 	 * bypassing regular-expression compiling.
 	 */
-	if (string(&c)->len == 1) {
-	    rs_shadow.type = SEP_CHAR;
-	    rs_shadow.c = string(&c)->str[0];
-	    break;
-	}
-	/* FALLTHRU */
-    default:
-	bozo("bad cell in set_rs_shadow");
+            if ( string( &c )->len == 1 ) {
+                rs_shadow.type = SEP_CHAR;
+                rs_shadow.c    = string( &c )->str[0];
+                break;
+            }
+            /* FALLTHRU */
+        default:
+            bozo( "bad cell in set_rs_shadow" );
     }
 }
 
 static void
-load_pfield(const char *name, CELL *cp)
+load_pfield( const char * name, CELL * cp )
 {
-    SYMTAB *stp;
+    SYMTAB * stp;
 
-    stp = insert(name);
-    stp->type = ST_FIELD;
+    stp           = insert( name );
+    stp->type     = ST_FIELD;
     stp->stval.cp = cp;
 }
 
 /* initialize $0 and the pseudo fields */
 void
-field_init(void)
+field_init( void )
 {
-    allocate_fbankv(0);
+    allocate_fbankv( 0 );
 
     field[0].type = C_STRING;
-    field[0].ptr = (PTR) & null_str;
+    field[0].ptr  = (PTR)&null_str;
     null_str.ref_cnt++;
 
-    load_pfield("NF", NF);
+    load_pfield( "NF", NF );
     NF->type = C_DOUBLE;
     NF->dval = 0.0;
 
-    load_pfield("RS", RS);
+    load_pfield( "RS", RS );
     RS->type = C_STRING;
-    RS->ptr = (PTR) new_STRING("\n");
+    RS->ptr  = (PTR)new_STRING( "\n" );
     /* rs_shadow already set */
 
-    load_pfield("FS", FS);
+    load_pfield( "FS", FS );
     FS->type = C_STRING;
-    FS->ptr = (PTR) new_STRING(" ");
+    FS->ptr  = (PTR)new_STRING( " " );
     /* fs_shadow is already set */
 
-    load_pfield("OFMT", OFMT);
+    load_pfield( "OFMT", OFMT );
     OFMT->type = C_STRING;
-    OFMT->ptr = (PTR) new_STRING("%.6g");
+    OFMT->ptr  = (PTR)new_STRING( "%.6g" );
 
-    load_pfield("CONVFMT", CONVFMT);
+    load_pfield( "CONVFMT", CONVFMT );
     CONVFMT->type = C_STRING;
-    CONVFMT->ptr = OFMT->ptr;
-    string(OFMT)->ref_cnt++;
+    CONVFMT->ptr  = OFMT->ptr;
+    string( OFMT )->ref_cnt++;
 }
 
 void
-set_field0(const char *s, size_t len)
+set_field0( const char * s, size_t len )
 {
-    cell_destroy(&field[0]);
+    cell_destroy( &field[0] );
     nf = -1;
 
-    if (len) {
-	field[0].type = C_MBSTRN;
-	field[0].ptr = (PTR) new_STRING2(s,len);
-    } else {
-	field[0].type = C_STRING;
-	field[0].ptr = STRING_dup(the_empty_str) ;
+    if ( len ) {
+        field[0].type = C_MBSTRN;
+        field[0].ptr  = (PTR)new_STRING2( s, len );
+    }
+    else {
+        field[0].type = C_STRING;
+        field[0].ptr  = STRING_dup( the_empty_str );
     }
 }
 
@@ -228,57 +230,57 @@ set_field0(const char *s, size_t len)
 */
 
 void
-split_field0(void)
+split_field0( void )
 {
-    CELL *cp0;
+    CELL * cp0;
     size_t cnt = 0;
-    CELL hold0;			/* copy field[0] here if not string */
+    CELL   hold0; /* copy field[0] here if not string */
 
-    if (field[0].type < C_STRING) {
-	cast1_to_s(cellcpy(&hold0, field + 0));
-	cp0 = &hold0;
-    } else {
-	cp0 = &field[0];
+    if ( field[0].type < C_STRING ) {
+        cast1_to_s( cellcpy( &hold0, field + 0 ) );
+        cp0 = &hold0;
+    }
+    else {
+        cp0 = &field[0];
     }
 
-    if (string(cp0)->len > 0) {
-	switch (fs_shadow.type) {
-	case C_SNULL:		/* FS == "" */
-	    cnt = null_split(string(cp0)->str, string(cp0)->len);
-	    break;
+    if ( string( cp0 )->len > 0 ) {
+        switch ( fs_shadow.type ) {
+            case C_SNULL: /* FS == "" */
+                cnt = null_split( string( cp0 )->str, string( cp0 )->len );
+                break;
 
-	case C_SPACE:
-	    cnt = space_split(string(cp0)->str, string(cp0)->len);
-	    break;
+            case C_SPACE:
+                cnt = space_split( string( cp0 )->str, string( cp0 )->len );
+                break;
 
-	default:
-	    cnt = re_split(string(cp0)->str, string(cp0)->len, fs_shadow.ptr);
-	    break;
-	}
-
+            default:
+                cnt = re_split( string( cp0 )->str, string( cp0 )->len, fs_shadow.ptr );
+                break;
+        }
     }
     /* the above xxx_split() function put the fields in an anonyous
      * buffer that will be pulled into the fields with a transer call */
 
     /* we are done with cp0 */
-    if (cp0 == &hold0) {
-	free_STRING(string(cp0));
+    if ( cp0 == &hold0 ) {
+        free_STRING( string( cp0 ) );
     }
 
-    nf = (int) cnt;
+    nf = (int)cnt;
 
-    cell_destroy(NF);
+    cell_destroy( NF );
     NF->type = C_DOUBLE;
-    NF->dval = (double) nf;
+    NF->dval = (double)nf;
 
-    if (nf > max_field) {
-	slow_field_ptr(nf);
+    if ( nf > max_field ) {
+        slow_field_ptr( nf );
     }
     /* fields 1 .. nf are created and valid */
 
     /* retrieves the result of xxx_split() */
-    if (cnt > 0) {
-	transfer_to_fields(cnt);
+    if ( cnt > 0 ) {
+        transfer_to_fields( cnt );
     }
 }
 
@@ -288,221 +290,223 @@ split_field0(void)
 */
 
 void
-field_assign(CELL *fp, CELL *cp)
+field_assign( CELL * fp, CELL * cp )
 {
     CELL c;
-    int i, j;
+    int  i, j;
 
     /* the most common case first */
-    if (fp == field) {
-	cell_destroy(field);
-	cellcpy(fp, cp);
-	nf = -1;
-	return;
+    if ( fp == field ) {
+        cell_destroy( field );
+        cellcpy( fp, cp );
+        nf = -1;
+        return;
     }
 
     /* its not important to do any of this fast */
 
-    if (nf < 0) {
-	split_field0();
+    if ( nf < 0 ) {
+        split_field0();
     }
 
-    switch (i = (int) (fp - field)) {
+    switch ( i = (int)( fp - field ) ) {
 
-    case NF_field:
+        case NF_field:
 
-	cell_destroy(NF);
-	cellcpy(NF, cellcpy(&c, cp));
-	if (c.type != C_DOUBLE)
-	    cast1_to_d(&c);
+            cell_destroy( NF );
+            cellcpy( NF, cellcpy( &c, cp ) );
+            if ( c.type != C_DOUBLE )
+                cast1_to_d( &c );
 
-	if ((j = d_to_int(c.dval)) < 0)
-	    rt_error("negative value assigned to NF");
+            if ( ( j = d_to_int( c.dval ) ) < 0 )
+                rt_error( "negative value assigned to NF" );
 
-	if (j > nf)
-	    for (i = nf + 1; i <= j; i++) {
-		cp = field_ptr(i);
-		cell_destroy(cp);
-		cp->type = C_STRING;
-		cp->ptr = (PTR) & null_str;
-		null_str.ref_cnt++;
-	    }
+            if ( j > nf )
+                for ( i = nf + 1; i <= j; i++ ) {
+                    cp = field_ptr( i );
+                    cell_destroy( cp );
+                    cp->type = C_STRING;
+                    cp->ptr  = (PTR)&null_str;
+                    null_str.ref_cnt++;
+                }
 
-	nf = j;
-	build_field0();
-	break;
+            nf = j;
+            build_field0();
+            break;
 
-    case RS_field:
-	cell_destroy(RS);
-	cellcpy(RS, cp);
-	set_rs_shadow();
-	break;
+        case RS_field:
+            cell_destroy( RS );
+            cellcpy( RS, cp );
+            set_rs_shadow();
+            break;
 
-    case FS_field:
-	cell_destroy(FS);
-	cast_for_split(cellcpy(&fs_shadow, cellcpy(FS, cp)));
-	break;
+        case FS_field:
+            cell_destroy( FS );
+            cast_for_split( cellcpy( &fs_shadow, cellcpy( FS, cp ) ) );
+            break;
 
-    case OFMT_field:
-    case CONVFMT_field:
-	/* If the user does something stupid with OFMT or CONVFMT,
+        case OFMT_field:
+        case CONVFMT_field:
+            /* If the user does something stupid with OFMT or CONVFMT,
 	   we could crash.
 
 	   We make such assignments a run-time error.
 	   This is new behavior.
 	 */
 
-	free_STRING(string(fp));
-	cellcpy(fp, cp);
-	if (fp->type == C_MBSTRN) {
-	    fp->type = C_STRING ;
-	}
-	if (fp->type != C_STRING) {
-	    rt_error("numeric assignment to %s",
-	        fp == CONVFMT ? "CONVFMT" : "OFMT") ;
-	}
-	{
-	    STRING* check = check_convfmt(string(fp)) ;
-	    if (! check) {
-	        rt_error("invalid format \"%s\" assigned to %s",
-		    string(fp)->str, fp == CONVFMT ? "CONVFMT" : "OFMT") ;
-	    }
-	    free_STRING(string(fp)) ;
-	    fp->ptr = check ;
-	}
-	break;
+            free_STRING( string( fp ) );
+            cellcpy( fp, cp );
+            if ( fp->type == C_MBSTRN ) {
+                fp->type = C_STRING;
+            }
+            if ( fp->type != C_STRING ) {
+                rt_error( "numeric assignment to %s",
+                          fp == CONVFMT ? "CONVFMT" : "OFMT" );
+            }
+            {
+                STRING * check = check_convfmt( string( fp ) );
+                if ( !check ) {
+                    rt_error( "invalid format \"%s\" assigned to %s",
+                              string( fp )->str, fp == CONVFMT ? "CONVFMT" : "OFMT" );
+                }
+                free_STRING( string( fp ) );
+                fp->ptr = check;
+            }
+            break;
 
-    default:			/* $1 or $2 or ... */
+        default: /* $1 or $2 or ... */
 
-	cell_destroy(fp);
-	cellcpy(fp, cp);
+            cell_destroy( fp );
+            cellcpy( fp, cp );
 
-	if (i < 0 || i >= FBANK_SZ) {
-	    /* field assigned to was not in field[0..FBANK_SZ-1]
+            if ( i < 0 || i >= FBANK_SZ ) {
+                /* field assigned to was not in field[0..FBANK_SZ-1]
 	     * or a pseudo field, so compute actual field index
 	     */
-	    i = field_addr_to_index(fp);
-	}
+                i = field_addr_to_index( fp );
+            }
 
-	if (i > nf) {
-	    for (j = nf + 1; j < i; j++) {
-		cp = field_ptr(j);
-		cell_destroy(cp);
-		cp->type = C_STRING;
-		cp->ptr = (PTR) & null_str;
-		null_str.ref_cnt++;
-	    }
-	    nf = i;
-	    cell_destroy(NF);
-	    NF->type = C_DOUBLE;
-	    NF->dval = (double) i;
-	}
+            if ( i > nf ) {
+                for ( j = nf + 1; j < i; j++ ) {
+                    cp = field_ptr( j );
+                    cell_destroy( cp );
+                    cp->type = C_STRING;
+                    cp->ptr  = (PTR)&null_str;
+                    null_str.ref_cnt++;
+                }
+                nf = i;
+                cell_destroy( NF );
+                NF->type = C_DOUBLE;
+                NF->dval = (double)i;
+            }
 
-	build_field0();
-
+            build_field0();
     }
 }
 
 /* construct field[0] from the other fields */
 
 static void
-build_field0(void)
+build_field0( void )
 {
 
 #ifdef DEBUG
-    if (nf < 0)
-	bozo("nf <0 in build_field0");
+    if ( nf < 0 )
+        bozo( "nf <0 in build_field0" );
 #endif
 
-    cell_destroy(field + 0);
+    cell_destroy( field + 0 );
 
-    if (nf == 0) {
-	field[0].type = C_STRING;
-	field[0].ptr = (PTR) & null_str;
-	null_str.ref_cnt++;
-    } else if (nf == 1) {
-	cellcpy(field, field + 1);
-    } else {
-	CELL c;
-	STRING *ofs, *tail;
-	size_t len;
-	register CELL *cp;
-	register char *p, *q;
-	int cnt;
-	CELL **fbp, *cp_limit;
+    if ( nf == 0 ) {
+        field[0].type = C_STRING;
+        field[0].ptr  = (PTR)&null_str;
+        null_str.ref_cnt++;
+    }
+    else if ( nf == 1 ) {
+        cellcpy( field, field + 1 );
+    }
+    else {
+        CELL            c;
+        STRING *        ofs, *tail;
+        size_t          len;
+        register CELL * cp;
+        register char * p, *q;
+        int             cnt;
+        CELL **         fbp, *cp_limit;
 
-	cast1_to_s(cellcpy(&c, OFS));
-	ofs = (STRING *) c.ptr;
-	cast1_to_s(cellcpy(&c, field_ptr(nf)));
-	tail = (STRING *) c.ptr;
-	cnt = nf - 1;
+        cast1_to_s( cellcpy( &c, OFS ) );
+        ofs = (STRING *)c.ptr;
+        cast1_to_s( cellcpy( &c, field_ptr( nf ) ) );
+        tail = (STRING *)c.ptr;
+        cnt  = nf - 1;
 
-	len = ((size_t) cnt) * ofs->len + tail->len;
+        len = ( (size_t)cnt ) * ofs->len + tail->len;
 
-	fbp = fbankv;
-	cp_limit = field + FBANK_SZ;
-	cp = field + 1;
+        fbp      = fbankv;
+        cp_limit = field + FBANK_SZ;
+        cp       = field + 1;
 
-	while (cnt-- > 0) {
-	    if (cp->type < C_STRING) {	/* use the string field temporarily */
-		if (cp->type == C_NOINIT) {
-		    cp->ptr = (PTR) & null_str;
-		    null_str.ref_cnt++;
-		} else {	/* its a double */
-		    CELL tmp ;
-		    tmp.type = C_DOUBLE ;
-		    tmp.dval = cp->dval ;
+        while ( cnt-- > 0 ) {
+            if ( cp->type < C_STRING ) { /* use the string field temporarily */
+                if ( cp->type == C_NOINIT ) {
+                    cp->ptr = (PTR)&null_str;
+                    null_str.ref_cnt++;
+                }
+                else { /* its a double */
+                    CELL tmp;
+                    tmp.type = C_DOUBLE;
+                    tmp.dval = cp->dval;
 
-		    cast1_to_s(&tmp) ;
-		    cp->ptr = tmp.ptr ;
-		}
-	    }
+                    cast1_to_s( &tmp );
+                    cp->ptr = tmp.ptr;
+                }
+            }
 
-	    len += string(cp)->len;
+            len += string( cp )->len;
 
-	    if (++cp == cp_limit) {
-		cp = *++fbp;
-		cp_limit = cp + FBANK_SZ;
-	    }
+            if ( ++cp == cp_limit ) {
+                cp       = *++fbp;
+                cp_limit = cp + FBANK_SZ;
+            }
+        }
 
-	}
+        field[0].type = C_STRING;
+        field[0].ptr  = (PTR)new_STRING0( len );
 
-	field[0].type = C_STRING;
-	field[0].ptr = (PTR) new_STRING0(len);
+        p = string( field )->str;
 
-	p = string(field)->str;
+        /* walk it again , putting things together */
+        cnt      = nf - 1;
+        fbp      = fbankv;
+        cp       = field + 1;
+        cp_limit = field + FBANK_SZ;
+        while ( cnt-- > 0 ) {
+            memcpy( p, string( cp )->str, string( cp )->len );
+            p += string( cp )->len;
+            /* if not really string, free temp use of ptr */
+            if ( cp->type < C_STRING ) {
+                free_STRING( string( cp ) );
+            }
+            if ( ++cp == cp_limit ) {
+                cp       = *++fbp;
+                cp_limit = cp + FBANK_SZ;
+            }
+            /* add the separator */
+            q = ofs->str;
+            while ( *q )
+                *p++ = *q++;
+        }
+        /* tack tail on the end */
+        memcpy( p, tail->str, tail->len );
 
-	/* walk it again , putting things together */
-	cnt = nf - 1;
-	fbp = fbankv;
-	cp = field + 1;
-	cp_limit = field + FBANK_SZ;
-	while (cnt-- > 0) {
-	    memcpy(p, string(cp)->str, string(cp)->len);
-	    p += string(cp)->len;
-	    /* if not really string, free temp use of ptr */
-	    if (cp->type < C_STRING) {
-		free_STRING(string(cp));
-	    }
-	    if (++cp == cp_limit) {
-		cp = *++fbp;
-		cp_limit = cp + FBANK_SZ;
-	    }
-	    /* add the separator */
-	    q = ofs->str;
-	    while (*q)
-		*p++ = *q++;
-	}
-	/* tack tail on the end */
-	memcpy(p, tail->str, tail->len);
-
-	/* cleanup */
-	if (tail == ofs) {
-	    free_STRING(tail);
-	} else {
-	    free_STRING(tail);
-	    free_STRING(ofs);
-	}
+        /* cleanup */
+        if ( tail == ofs ) {
+            free_STRING( tail );
+        }
+        else {
+            free_STRING( tail );
+            free_STRING( ofs );
+        }
     }
 }
 
@@ -510,41 +514,42 @@ build_field0(void)
    a field
 */
 void
-slow_cell_assign(CELL *target, CELL *source)
+slow_cell_assign( CELL * target, CELL * source )
 {
-    if (field <= target && target <= LAST_PFIELD) {
-	field_assign(target, source);
-    } else {
-	size_t i;
-	for (i = 1; i < fbankv_num_chunks * FBANKV_CHUNK_SIZE; i++) {
-	    CELL *bank_start = fbankv[i];
-	    CELL *bank_end = bank_start + FBANK_SZ;
+    if ( field <= target && target <= LAST_PFIELD ) {
+        field_assign( target, source );
+    }
+    else {
+        size_t i;
+        for ( i = 1; i < fbankv_num_chunks * FBANKV_CHUNK_SIZE; i++ ) {
+            CELL * bank_start = fbankv[i];
+            CELL * bank_end   = bank_start + FBANK_SZ;
 
-	    if (bank_start == 0)
-		break;
+            if ( bank_start == 0 )
+                break;
 
-	    if (bank_start <= target && target < bank_end) {
-		/* it is a field */
-		field_assign(target, source);
-		return;
-	    }
-	}
-	/* its not a field */
-	cell_destroy(target);
-	cellcpy(target, source);
+            if ( bank_start <= target && target < bank_end ) {
+                /* it is a field */
+                field_assign( target, source );
+                return;
+            }
+        }
+        /* its not a field */
+        cell_destroy( target );
+        cellcpy( target, source );
     }
 }
 
 int
-field_addr_to_index(CELL *cp)
+field_addr_to_index( CELL * cp )
 {
-    CELL **p = fbankv;
+    CELL ** p = fbankv;
 
-    while (cp < *p || cp >= *p + FBANK_SZ) {
-	p++;
+    while ( cp < *p || cp >= *p + FBANK_SZ ) {
+        p++;
     }
 
-    return (int) (((p - fbankv) << FB_SHIFT) + (cp - *p));
+    return (int)( ( ( p - fbankv ) << FB_SHIFT ) + ( cp - *p ) );
 }
 
 /*------- more than 1 fbank needed  ------------*/
@@ -557,67 +562,66 @@ field_addr_to_index(CELL *cp)
 */
 
 CELL *
-slow_field_ptr(int i)
+slow_field_ptr( int i )
 {
 
-    if (i > max_field) {	/* need to allocate more field memory */
-	int j;
-	allocate_fbankv(i);
+    if ( i > max_field ) { /* need to allocate more field memory */
+        int j;
+        allocate_fbankv( i );
 
-	j = (max_field >> FB_SHIFT) + 1;
+        j = ( max_field >> FB_SHIFT ) + 1;
 #ifdef DEBUG
-	if(!(j > 0 && fbankv[j - 1] != 0 && fbankv[j] == 0)) {
-	    bozo("confused in slow_field_ptr");
-	}
+        if ( !( j > 0 && fbankv[j - 1] != 0 && fbankv[j] == 0 ) ) {
+            bozo( "confused in slow_field_ptr" );
+        }
 #endif
 
-	do {
-	    fbankv[j] = (CELL *) emalloc(sizeof(CELL) * FBANK_SZ);
-	    memset(fbankv[j], 0, sizeof(CELL) * FBANK_SZ);
-	    j++;
-	    max_field += FBANK_SZ;
-	}
-	while (i > max_field);
+        do {
+            fbankv[j] = (CELL *)emalloc( sizeof( CELL ) * FBANK_SZ );
+            memset( fbankv[j], 0, sizeof( CELL ) * FBANK_SZ );
+            j++;
+            max_field += FBANK_SZ;
+        } while ( i > max_field );
     }
 
-    return &fbankv[i >> FB_SHIFT][i & (FBANK_SZ - 1)];
+    return &fbankv[i >> FB_SHIFT][i & ( FBANK_SZ - 1 )];
 }
 
 #if USE_BINMODE
 
 /* read current value of BINMODE */
 int
-binmode(void)
+binmode( void )
 {
     CELL c;
 
-    cast1_to_d(cellcpy(&c, BINMODE));
-    return d_to_int(c.dval);
+    cast1_to_d( cellcpy( &c, BINMODE ) );
+    return d_to_int( c.dval );
 }
 
 /* set BINMODE and RS and ORS
    from environment or -W binmode=   */
 
 void
-set_binmode(int x)
+set_binmode( int x )
 {
     CELL c;
-    int change = ((x & 4) == 0);
+    int  change = ( ( x & 4 ) == 0 );
 
     /* set RS */
     c.type = C_STRING;
-    c.ptr = (PTR) new_STRING((change && (x & 1)) ? "\r\n" : "\n");
-    field_assign(RS, &c);
-    free_STRING(string(&c));
+    c.ptr  = (PTR)new_STRING( ( change && ( x & 1 ) ) ? "\r\n" : "\n" );
+    field_assign( RS, &c );
+    free_STRING( string( &c ) );
 
     /* set ORS */
-    cell_destroy(ORS);
+    cell_destroy( ORS );
     ORS->type = C_STRING;
-    ORS->ptr = (PTR) new_STRING((change && (x & 2)) ? "\r\n" : "\n");
+    ORS->ptr  = (PTR)new_STRING( ( change && ( x & 2 ) ) ? "\r\n" : "\n" );
 
-    cell_destroy(BINMODE);
+    cell_destroy( BINMODE );
     BINMODE->type = C_DOUBLE;
-    BINMODE->dval = (double) x;
+    BINMODE->dval = (double)x;
 }
 
 #endif /* USE_BINMODE */
@@ -625,65 +629,65 @@ set_binmode(int x)
 #ifdef MEM_CHECK
 
 static void
-fbank_free(CELL *const fb)
+fbank_free( CELL * const fb )
 {
-    CELL *end = fb + FBANK_SZ;
-    CELL *cp;
-    for (cp = fb; cp < end; cp++) {
-	cell_destroy(cp);
+    CELL * end = fb + FBANK_SZ;
+    CELL * cp;
+    for ( cp = fb; cp < end; cp++ ) {
+        cell_destroy( cp );
     }
-    free(fb) ;
+    free( fb );
 }
 
 static void
-fbankv_free(void)
+fbankv_free( void )
 {
-    unsigned i = 1;
+    unsigned     i   = 1;
     const size_t cnt = FBANKV_CHUNK_SIZE * fbankv_num_chunks;
-    while (i < cnt && fbankv[i] != 0) {
-	fbank_free(fbankv[i]);
-	i++;
+    while ( i < cnt && fbankv[i] != 0 ) {
+        fbank_free( fbankv[i] );
+        i++;
     }
-    for (; i < cnt; i++) {
-	if (fbankv[i] != 0) {
-	    bozo("unexpected pointer in fbankv[]");
-	}
+    for ( ; i < cnt; i++ ) {
+        if ( fbankv[i] != 0 ) {
+            bozo( "unexpected pointer in fbankv[]" );
+        }
     }
-    free(fbankv) ;
+    free( fbankv );
 }
 
 void
-field_leaks(void)
+field_leaks( void )
 {
     int n;
 
     /* everything in field[] */
-    for (n = 0; n < FBANK_SZ + NUM_PFIELDS; n++) {
-	cell_destroy(&field[n]);
+    for ( n = 0; n < FBANK_SZ + NUM_PFIELDS; n++ ) {
+        cell_destroy( &field[n] );
     }
     /* fbankv[0] == field
        this call does all the rest of the fields
      */
     fbankv_free();
 
-    switch (fs_shadow.type) {
-    case C_RE:
-	break;
-    case C_STRING:
-    case C_STRNUM:
-    case C_MBSTRN:
-	cell_destroy(&fs_shadow);
-	break;
-    default:
-	break;
+    switch ( fs_shadow.type ) {
+        case C_RE:
+            break;
+        case C_STRING:
+        case C_STRNUM:
+        case C_MBSTRN:
+            cell_destroy( &fs_shadow );
+            break;
+        default:
+            break;
     }
 
-    switch (rs_shadow.type) {
-    case SEP_STR:
-	free_STRING(((STRING *) (&rs_shadow.ptr)));
-	break;
-    case SEP_RE:
-	break;
+    switch ( rs_shadow.type ) {
+        case SEP_STR:
+            free_STRING( ( (STRING *)( &rs_shadow.ptr ) ) );
+            break;
+        case SEP_RE:
+            break;
     }
 }
 #endif

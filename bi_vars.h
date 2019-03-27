@@ -26,7 +26,7 @@ you agree to not name that product mawk.
 */
 
 /* NR and FNR must be next to each other */
-#define  NR	   bi_vars
+#define  NR	        bi_vars
 #define  FNR	   (bi_vars+1)
 #define  ARGC      (bi_vars+2)
 #define  FILENAME  (bi_vars+3)
