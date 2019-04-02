@@ -35,8 +35,7 @@ extern int yydebug; /* print parse if on */
 extern int dump_RE;
 #endif
 
-extern int posix_space_flag, interactive_flag;
-extern int posix_repl_scan_flag;
+
 
 /*----------------
  *  GLOBAL VARIABLES
@@ -72,9 +71,20 @@ extern int          print_flag, getline_flag;
 extern const char * progname;      /* for error messages */
 extern unsigned     rt_nr, rt_fnr; /* ditto */
 
+extern int posix_space_flag;
+extern int interactive_flag;
+extern int posix_repl_scan_flag;
+
 int mawk_state;     /* 0 is compiling */
 #define EXECUTION 1 /* other state is 0 compiling */
 
+// typedef struct mawk_opts {
+
+// } mawk_opts;
+
+// typedef struct mawk_ctx {
+//     state
+// } mawk_ctx;
 
 /* macro to test the type of two adjacent cells */
 #define TEST2( cp ) ( mpow2[( cp )->type] + mpow2[( ( cp ) + 1 )->type] )

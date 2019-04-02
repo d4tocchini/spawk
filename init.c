@@ -15,6 +15,7 @@ you agree to not name that product mawk.
 
 /* init.c */
 #include <signal.h>
+#include <stdbool.h>
 #include "mawk.h"
 #include "code.h"
 #include "memory.h"
@@ -25,8 +26,8 @@ you agree to not name that product mawk.
 
 static void process_cmdline( int, char ** );
 static void set_ARGV( int, char **, int );
-static void bad_option( const char * );
-static void no_program( void );
+static void exit_bad_option( const char * );
+static void exit_no_program( void );
 static void print_help( void );
 static void catch_fpe( int );
 
@@ -97,155 +98,158 @@ int posix_space_flag;
 int dump_RE = 1; /* if on dump compiled REs  */
 #endif
 
-static void
-bad_option( const char * s )
-{
-    errmsg( 0, "not an option: %s", s );
-    mawk_exit( 2 );
-}
+// #define optarg optarg_ /* remove conflict with optarg in <getopt.h> */
 
-static void
-no_program( void )
-{
-    mawk_exit( 0 );
-}
+#define MAWKCLI_REQ_ARG_VAL( ARGKEY )                         \
+    do {                                                        \
+        if ( ++i == argc ) {                                    \
+            errmsg( 0, "arg key missing val: %s", ( ARGKEY ) ); \
+            mawk_exit( 2 );                                     \
+        }                                                       \
+    } while ( 0 )
 
-#define optarg optarg_ /* remove conflict with optarg in <getopt.h> */
 
 static void
 process_cmdline( int argc, char ** argv )
 {
-    int     i, nextarg;
-    char *  optarg;
+   
+    int     i;
     PFILE   dummy; /* starts linked list of filenames */
     PFILE * tail = &dummy;
 
-    for ( i = 1; i < argc && argv[i][0] == '-'; i = nextarg ) {
-        if ( argv[i][1] == 0 ) /* -  alone */
-        {
+    for ( i = 1; i < argc && argv[i][0] == '-'; ) {
+
+        const char c1 = argv[i][1];
+        if ( c1 == 0 ) { // -  alone
             if ( !pfile_name )
-                no_program();
-            break; /* the for loop */
+                exit_no_program();
+            break;
         }
-        /* safe to look at argv[i][2] */
+        // safe to look at argv[i][2]
+        const char c2          = argv[i][2];
+        const bool isdubdash   = c1 == '-';
+        const bool ismultichar = c2 != 0;
+        const char c           = isdubdash && ismultichar
+                           ? c2
+                           : c1;
 
-        /* handle two arguments that are now widely supported in most free and open-source software  */
-        if ( strncmp( argv[i], "--v", 3 ) == 0 || strncmp( argv[i], "--V", 3 ) == 0 ) {
-            /* --version  */
-            print_version();
-            /* no return */
-        }
+        switch ( c ) {
 
-        if ( strncmp( argv[i], "--h", 3 ) == 0 || strncmp( argv[i], "--H", 3 ) == 0 ) {
-            /* --help */
-            print_help();
-            /* no return */
-        }
-
-        if ( argv[i][2] == 0 ) {
-            if ( i == argc - 1 && argv[i][1] != '-' ) {
-                if ( strchr( "WFvf", argv[i][1] ) ) {
-                    errmsg( 0, "option %s lacks argument", argv[i] );
-                    mawk_exit( 2 );
-                }
-                bad_option( argv[i] );
-            }
-
-            optarg  = argv[i + 1];
-            nextarg = i + 2;
-        }
-        else /* argument glued to option */
-        {
-            optarg  = &argv[i][2];
-            nextarg = i + 1;
-        }
-
-        switch ( argv[i][1] ) {
-            case 'W':
-
-                if ( optarg[0] >= 'a' && optarg[0] <= 'z' )
-                    optarg[0] += 'A' - 'a';
-                if ( optarg[0] == 'V' )
-                    print_version();
-                if ( optarg[0] == 'H' )
-                    print_help();
-                else if ( optarg[0] == 'D' ) {
-                    dump_code_flag = 1;
-                }
-                else if ( optarg[0] == 'S' ) {
-                    /* obsolete, silently ignore */
-                }
-#if MSDOS
-                else if ( optarg[0] == 'B' ) {
-                    char * p = strchr( optarg, '=' );
-                    int    x = p ? atoi( p + 1 ) : 0;
-
-                    set_binmode( x );
-                }
-#endif
-                else if ( optarg[0] == 'P' ) {
-                    posix_space_flag     = 1;
-                    posix_repl_scan_flag = 1;
-                }
-                else if ( optarg[0] == 'E' ) {
-                    if ( pfile_name ) {
-                        errmsg( 0, "-W exec is incompatible with -f" );
-                        mawk_exit( 2 );
-                    }
-                    else if ( nextarg == argc )
-                        no_program();
-
-                    pfile_name = argv[nextarg];
-                    i          = nextarg + 1;
-                    goto no_more_opts;
-                }
-                else if ( optarg[0] == 'I' ) {
-                    interactive_flag = 1;
-                    setbuf( stdout, (char *)0 );
-                }
-                else
-                    errmsg( 0, "vacuous option: -W %s", optarg );
-
-                break;
-
-            case 'v':
-                if ( !is_cmdline_assign( optarg ) ) {
-                    errmsg( 0, "improper assignment: -v %s", optarg );
-                    mawk_exit( 2 );
-                }
-                break;
-
-            case 'F':
-
-            {
-                /* recognize escape sequences */
-                size_t len = rm_escape( optarg );
-                cell_destroy( FS );
-                FS->type = C_STRING;
-                FS->ptr  = new_STRING2( optarg, len );
-                cast_for_split( cellcpy( &fs_shadow, FS ) );
-            } break;
+            case 'i':
+                interactive_flag = 1;
+                setbuf( stdout, (char *)0 );
+                i++;
+                continue;
 
             case '-':
-                if ( argv[i][2] != 0 )
-                    bad_option( argv[i] );
                 i++;
                 goto no_more_opts;
 
+            case 'F':
+                MAWKCLI_REQ_ARG_VAL( "-F --FS field_separator" );
+                {
+                    // recognize escape sequences
+                    const size_t len = rm_escape( argv[i] );
+                    cell_destroy( FS );
+                    FS->type = C_STRING;
+                    FS->ptr  = new_STRING2( argv[i], len );
+                    cast_for_split(
+                        cellcpy( &fs_shadow, FS )
+                    );
+                }
+                i++;
+                continue;
+
             case 'f':
-                /* first file goes in pfile_name ; any more go
-	       on a list */
+                // TODO: ASSERT -e option not set
+                // first file goes in pfile_name ; any more go on a list
+                MAWKCLI_REQ_ARG_VAL( "-f file" );
                 if ( !pfile_name )
-                    pfile_name = optarg;
+                    pfile_name = argv[i];
                 else {
                     tail = tail->link = ZMALLOC( PFILE );
-                    tail->fname       = optarg;
+                    tail->fname       = argv[i];
                 }
-                break;
+                i++;
+                continue;
 
+            case 'e':
+                // -e --exec file
+                MAWKCLI_REQ_ARG_VAL( "-e --exec file" );
+                if ( pfile_name ) {
+                    errmsg( 0, "--exec is incompatible with -f" );
+                    mawk_exit( 2 );
+                }
+                pfile_name = argv[i];
+                i++;
+                goto no_more_opts;
+
+            case 'v':
+                // --version
+                if (ismultichar) {
+                    print_version();
+                    i++;
+                }
+
+                // -v var=val
+                else {
+                    MAWKCLI_REQ_ARG_VAL( "-v var=val" );
+                    if ( !is_cmdline_assign( argv[i] ) ) {
+                        errmsg( 0, "improper assignment: -v %s", argv[i] );
+                        mawk_exit( 2 );
+                    }
+                    i++;
+                }
+                continue;
+
+            case 'h':
+                // -h --help
+                print_help();
+                i++;
+                continue;
+
+            case 'd':
+                // -d --dump
+                dump_code_flag = 1;
+                i++;
+                continue;
+
+            case 'p':
+                posix_space_flag     = 1;
+                posix_repl_scan_flag = 1;
+                i++;
+                continue;
+
+#if MSDOS
+            case 'b':
+
+                // --bin-mode=...?
+                if (ismultichar) {
+                    char * p = strchr( argv[i], '=' );
+                    int    x = p ? atoi( p + 1 ) : 0;
+                    set_binmode( x );
+                    i++;
+                }
+                // -b ...?
+                // -bin-mode ...?
+                else {
+                    MAWKCLI_REQ_ARG_VAL( "-b bin-mode" );
+                }
+                continue;
+#endif
+            case 's': // -s !!OBSELETE!!
+                i++;
+                continue;
             default:
-                bad_option( argv[i] );
+                exit_bad_option( argv[i] );
         }
+
+
+        // TODO:
+        // else { // argument glued to option
+        //     optarg  = &argv[i][2];
+        //     nextarg = i + 1;
+        // }
     }
 
 no_more_opts:
@@ -260,7 +264,7 @@ no_more_opts:
     else /* program on command line */
     {
         if ( i == argc )
-            no_program();
+            exit_no_program();
         set_ARGV( argc, argv, i + 1 );
 
 #if MSDOS && !HAVE_REARGV /* reversed quotes */
@@ -364,6 +368,19 @@ catch_fpe( int x )
     else
         bozo( "catch_fpe" );
     mawk_exit( 2 );
+}
+
+static void
+exit_bad_option( const char * s )
+{
+    errmsg( 0, "not an option: %s", s );
+    mawk_exit( 2 );
+}
+
+static void
+exit_no_program( void )
+{
+    mawk_exit( 0 );
 }
 
 /*   HELP  */

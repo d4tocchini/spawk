@@ -12,6 +12,16 @@ LIBS		= @LIBS@
 SHELL		= /bin/sh
 YACC		= @YACC@
 
+
+### ====================================================================
+
+# include rexp/Makefile
+
+### ====================================================================
+
+OBJDIR := build
+REXP_OBJDIR := build/rexp
+
 ### ====================================================================
 ### The remainder of this file is copied verbatim into Makefile
 
@@ -28,16 +38,50 @@ FPE_FILTER	= sed						\
 		-e 's/[Ii][Nn][Ff]/inf/'			\
 		-e 's/[Ii][Nn][Ff][Ii][Nn][Ii][Yy]/inf/'
 
-O               = array.o bi_funct.o bi_vars.o cast.o code.o da.o error.o \
-		  execute.o fcall.o field.o files.o fin.o hash.o xxhash.o init.o int.o \
-		  jmp.o kw.o main.o memory.o parse.o print.o \
-		  printf.o re_cmpl.o scan.o scancode.o split.o version.o \
-		  zmalloc.o
 
-REXP_O		= $(REXP_C:.c=.o)
+O  := \
+ array.o \
+ bi_funct.o \
+ bi_vars.o \
+ cast.o \
+ code.o \
+ da.o \
+ error.o \
+ execute.o \
+ fcall.o \
+ field.o \
+ files.o \
+ fin.o \
+ hash.o \
+ xxhash.o \
+ init.o \
+ int.o \
+ jmp.o \
+ kw.o \
+ main.o \
+ memory.o \
+ parse.o \
+ print.o \
+ printf.o \
+ re_cmpl.o \
+ scan.o \
+ scancode.o \
+ split.o \
+ version.o \
+ zmalloc.o
 
-REXP_C          = rexp/rexp.c rexp/rexp0.c rexp/rexp1.c rexp/rexp2.c \
-		  rexp/rexp3.c rexp/rexpdb.c rexp/wait.c
+REXP_O := \
+ rexp.o \
+ rexp0.o \
+ rexp1.o \
+ rexp2.o \
+ rexp3.o \
+ rexpdb.o \
+ wait.o
+
+REXP_OBJS := $(addprefix $(REXP_OBJDIR)/,$(REXP_O))
+
+OBJS := $(addprefix $(OBJDIR)/,$(O))
 
 STATUS		= check.status
 
@@ -58,8 +102,8 @@ EXCLUDEFLAGS	= --exclude=$$$$b/Makefile	\
 
 ### ====================================================================
 
+all : mawk
 
-all : mkrexp mawk
 
 check:	check_begin mawk_test check_end
 
@@ -77,13 +121,12 @@ check_end:
 		cmp -s test/okay/$$f test/$$f || (echo ; echo Differences in $$f ; diff test/okay/$$f test/$$f ) ;	\
 	done
 
-mawk : $(O)  $(REXP_O)
-	$(CC) $(CFLAGS) -o mawk $(O) $(REXP_O) $(LIBS)
-
-mkrexp :
-	cd rexp ;\
-	$(MAKE) CC="$(CC)" CFLAGS="$(CFLAGS) -DMAWK -I.."
-
+# mkrexp :
+# 	cd rexp ;\
+# 	$(MAKE) CC="$(CC)" CFLAGS="$(CFLAGS) -DMAWK -I.." ;
+# $(REXP_O) :
+# 	cd rexp ;\
+# 	$(MAKE) CC="$(CC)" CFLAGS="$(CFLAGS) -DMAWK -I.." ;
 
 mawk_test :  mawk  # test that we have a sane mawk
 	@echo ; echo testing mawk
@@ -93,13 +136,9 @@ mawk_test :  mawk  # test that we have a sane mawk
 
 fpe_test :  mawk # test FPEs are handled OK
 	@echo ; echo testing floating point exception handling
-	-cd test ; ./fpe_test 
+	-cd test ; ./fpe_test
 
-$(REXP_O) :
-	cd rexp ;\
-	$(MAKE) CC="$(CC)" CFLAGS="$(CFLAGS) -DMAWK -I.."
-
-parse.c  parse.h : parse.y
+parse.c parse.h : parse.y
 	@echo  expect 6 shift/reduce conflicts
 	$(YACC) -d parse.y
 	mv y.tab.c parse.c
@@ -107,13 +146,11 @@ parse.c  parse.h : parse.y
 
 array.c : array.w
 	notangle -R'"array.c"' array.w | cpif array.c
-
 array.h : array.w
 	notangle -R'"array.h"' array.w | cpif array.h
 
 printf.c : printf.w
 	notangle -R'"printf.c"' printf.w | cpif printf.c
-
 printf.h : printf.w
 	notangle -R'"printf.h"' printf.w | cpif printf.h
 
@@ -123,6 +160,9 @@ scancode.c :  makescan.c  scan.h
 	./makescan.exe > scancode.c
 	rm makescan.exe
 
+mawk : $(REXP_OBJS) $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS) -I./ -Irexp $(LDFLAGS)
+
 MAWKMAN = $(MANDIR)/mawk.$(MANEXT)
 install :  mawk
 	cp mawk $(BINDIR)
@@ -131,7 +171,7 @@ install :  mawk
 	chmod  0644  $(MAWKMAN)
 
 clean :
-	-rm -f *.i *.o rexp/*.o test/mawk mawk $(STATUS)
+	-rm -fdR *.i *.o build rexp/*.o rexp/build test/mawk mawk $(STATUS)
 
 dist :
 	-d=`pwd` ;											\
@@ -158,56 +198,56 @@ doc :
 ### ====================================================================
 
 # dependencies computed by compiling with -MMD and makedeps  *.d
-array.o: array.c mawk.h types.h sizes.h int.h symtype.h array.h memory.h \
- zmalloc.h split.h field.h bi_vars.h
-bi_funct.o: bi_funct.c mawk.h types.h sizes.h bi_funct.h symtype.h \
- array.h bi_vars.h memory.h zmalloc.h init.h int.h files.h fin.h field.h \
- regexp.h repl.h
-bi_vars.o: bi_vars.c mawk.h types.h sizes.h symtype.h array.h bi_vars.h \
- field.h init.h memory.h zmalloc.h
-cast.o: cast.c mawk.h types.h sizes.h field.h memory.h zmalloc.h scan.h \
- symtype.h array.h parse.h repl.h int.h
-code.o: code.c mawk.h types.h sizes.h code.h memory.h zmalloc.h init.h \
- symtype.h array.h jmp.h field.h
-da.o: da.c mawk.h types.h sizes.h code.h memory.h zmalloc.h bi_funct.h \
- symtype.h array.h repl.h field.h printf.h files.h
-error.o: error.c mawk.h types.h sizes.h scan.h symtype.h array.h parse.h \
- bi_vars.h
-execute.o: execute.c mawk.h types.h sizes.h code.h memory.h zmalloc.h \
- symtype.h array.h int.h field.h bi_funct.h bi_vars.h regexp.h repl.h \
- fin.h
-fcall.o: fcall.c mawk.h types.h sizes.h symtype.h array.h code.h memory.h \
- zmalloc.h
-field.o: field.c mawk.h types.h sizes.h int.h split.h field.h init.h \
- symtype.h array.h memory.h zmalloc.h scan.h parse.h bi_vars.h repl.h \
- regexp.h
-files.o: files.c mawk.h types.h sizes.h files.h memory.h zmalloc.h fin.h
-fin.o: fin.c mawk.h types.h sizes.h fin.h memory.h zmalloc.h bi_vars.h \
- field.h symtype.h array.h scan.h parse.h
-hash.o: hash.c mawk.h types.h sizes.h memory.h zmalloc.h symtype.h \
- array.h
-init.o: init.c mawk.h types.h sizes.h code.h memory.h zmalloc.h symtype.h \
- array.h init.h bi_vars.h field.h
-int.o: int.c int.h
-jmp.o: jmp.c mawk.h types.h sizes.h symtype.h array.h jmp.h code.h \
- memory.h zmalloc.h init.h
-kw.o: kw.c mawk.h types.h sizes.h symtype.h array.h parse.h init.h
-main.o: main.c mawk.h types.h sizes.h init.h symtype.h array.h code.h \
- memory.h zmalloc.h files.h
-memory.o: memory.c mawk.h types.h sizes.h memory.h zmalloc.h
-parse.o: parse.c mawk.h types.h sizes.h symtype.h array.h code.h memory.h \
- zmalloc.h bi_funct.h bi_vars.h jmp.h field.h files.h printf.h
-print.o: print.c mawk.h types.h sizes.h bi_vars.h bi_funct.h symtype.h \
- array.h memory.h zmalloc.h field.h scan.h parse.h files.h int.h printf.h
-printf.o: printf.c mawk.h types.h sizes.h scan.h symtype.h array.h \
- parse.h printf.h memory.h zmalloc.h files.h int.h
-re_cmpl.o: re_cmpl.c mawk.h types.h sizes.h memory.h zmalloc.h scan.h \
- symtype.h array.h parse.h regexp.h repl.h split.h
-scan.o: scan.c mawk.h types.h sizes.h scan.h symtype.h array.h parse.h \
- memory.h zmalloc.h field.h init.h int.h fin.h repl.h code.h files.h
-scancode.o: scancode.c
-split.o: split.c mawk.h types.h sizes.h split.h symtype.h array.h \
- bi_vars.h bi_funct.h memory.h zmalloc.h scan.h parse.h regexp.h repl.h \
- field.h
-version.o: version.c mawk.h types.h sizes.h
-zmalloc.o: zmalloc.c mawk.h types.h sizes.h zmalloc.h
+$(OBJDIR)/array.o: array.c mawk.h types.h sizes.h int.h symtype.h array.h memory.h zmalloc.h split.h field.h bi_vars.h
+$(OBJDIR)/bi_funct.o: bi_funct.c mawk.h types.h sizes.h bi_funct.h symtype.h array.h bi_vars.h memory.h zmalloc.h init.h int.h files.h fin.h field.h regexp.h repl.h
+$(OBJDIR)/bi_vars.o: bi_vars.c mawk.h types.h sizes.h symtype.h array.h bi_vars.h field.h init.h memory.h zmalloc.h
+$(OBJDIR)/cast.o: cast.c mawk.h types.h sizes.h field.h memory.h zmalloc.h scan.h symtype.h array.h parse.h repl.h int.h
+$(OBJDIR)/code.o: code.c mawk.h types.h sizes.h code.h memory.h zmalloc.h init.h symtype.h array.h jmp.h field.h
+$(OBJDIR)/da.o: da.c mawk.h types.h sizes.h code.h memory.h zmalloc.h bi_funct.h symtype.h array.h repl.h field.h printf.h files.h
+$(OBJDIR)/error.o: error.c mawk.h types.h sizes.h scan.h symtype.h array.h parse.h bi_vars.h
+$(OBJDIR)/execute.o: execute.c mawk.h types.h sizes.h code.h memory.h zmalloc.h symtype.h array.h int.h field.h bi_funct.h bi_vars.h regexp.h repl.h fin.h
+$(OBJDIR)/fcall.o: fcall.c mawk.h types.h sizes.h symtype.h array.h code.h memory.h zmalloc.h
+$(OBJDIR)/field.o: field.c mawk.h types.h sizes.h int.h split.h field.h init.h symtype.h array.h memory.h zmalloc.h scan.h parse.h bi_vars.h repl.h regexp.h
+$(OBJDIR)/files.o: files.c mawk.h types.h sizes.h files.h memory.h zmalloc.h fin.h
+$(OBJDIR)/fin.o: fin.c mawk.h types.h sizes.h fin.h memory.h zmalloc.h bi_vars.h field.h symtype.h array.h scan.h parse.h
+$(OBJDIR)/hash.o: hash.c mawk.h types.h sizes.h memory.h zmalloc.h symtype.h array.h
+$(OBJDIR)/init.o: init.c mawk.h types.h sizes.h code.h memory.h zmalloc.h symtype.h array.h init.h bi_vars.h field.h
+$(OBJDIR)/int.o: int.c int.h
+$(OBJDIR)/jmp.o: jmp.c mawk.h types.h sizes.h symtype.h array.h jmp.h code.h memory.h zmalloc.h init.h
+$(OBJDIR)/kw.o: kw.c mawk.h types.h sizes.h symtype.h array.h parse.h init.h
+$(OBJDIR)/main.o: main.c mawk.h types.h sizes.h init.h symtype.h array.h code.h memory.h zmalloc.h files.h
+$(OBJDIR)/memory.o: memory.c mawk.h types.h sizes.h memory.h zmalloc.h
+$(OBJDIR)/parse.o: parse.c mawk.h types.h sizes.h symtype.h array.h code.h memory.h zmalloc.h bi_funct.h bi_vars.h jmp.h field.h files.h printf.h
+$(OBJDIR)/print.o: print.c mawk.h types.h sizes.h bi_vars.h bi_funct.h symtype.h array.h memory.h zmalloc.h field.h scan.h parse.h files.h int.h printf.h
+$(OBJDIR)/printf.o: printf.c mawk.h types.h sizes.h scan.h symtype.h array.h parse.h printf.h memory.h zmalloc.h files.h int.h
+$(OBJDIR)/re_cmpl.o: re_cmpl.c mawk.h types.h sizes.h memory.h zmalloc.h scan.h symtype.h array.h parse.h regexp.h repl.h split.h
+$(OBJDIR)/scan.o: scan.c mawk.h types.h sizes.h scan.h symtype.h array.h parse.h memory.h zmalloc.h field.h init.h int.h fin.h repl.h code.h files.h
+$(OBJDIR)/scancode.o: scancode.c
+$(OBJDIR)/split.o: split.c mawk.h types.h sizes.h split.h symtype.h array.h bi_vars.h bi_funct.h memory.h zmalloc.h scan.h parse.h regexp.h repl.h field.h
+$(OBJDIR)/version.o: version.c mawk.h types.h sizes.h
+$(OBJDIR)/zmalloc.o: zmalloc.c mawk.h types.h sizes.h zmalloc.h
+
+### ====================================================================
+
+# make the directory an order-only prerequisite on all the targets: Now the rule to create the objdir directory will be run, if needed, before any ‘.o’ is built, but no ‘.o’ will be built because the objdir directory timestamp changed.
+
+$(REXP_OBJDIR): | $(OBJDIR)
+	mkdir -p $(REXP_OBJDIR)
+
+$(OBJS): | $(OBJDIR)
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
+$(REXP_OBJS): rexp/rexp.h rexp/wait.h | $(OBJDIR) $(REXP_OBJDIR)
+
+define build-obj =
+	$(CC) $(CFLAGS) -o $@ -DMAWK -I./ -Irexp -c $(filter %.c,$^) $(LIBS) $(LDFLAGS)
+endef
+
+$(REXP_OBJDIR)/%.o : rexp/%.c
+	$(build-obj)
+
+$(OBJDIR)/%.o : %.c | $(OBJDIR) $(REXP_OBJDIR)
+	$(build-obj)
+
