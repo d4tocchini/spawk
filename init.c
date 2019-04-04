@@ -108,11 +108,100 @@ int dump_RE = 1; /* if on dump compiled REs  */
         }                                                       \
     } while ( 0 )
 
+// typedef struct mm_args {
+//     unsigned int const argc,
+//     char const * const argv,
+// }
+
+
+
+// typedef struct mm_arg {
+//     mm_arg_handler *   handle,
+//     mm_arg_setter *    set
+// } mm_arg;
+
+// typedef struct mawk_opts {
+//     unsigned int    is_interactive:1,
+//     unsigned int    is_posix:1,
+//     unsigned int    has_e:1,
+//     unsigned int    has_f:1,
+//     //unsigned int    is_:1,
+//     char *          pfile_name,
+//     PFILE *         pfile_list,
+// } mawk_opts;
+
+// typedef bool (*mawk_arg_handler)(const mawk_opts *);
+// typedef bool (*mawk_arg_setter)(const mawk_opts *, const char *);
+
+// mawk_arg_i_handler(const mawk_opts * opts) {
+
+// }
+
+// mm_arg[]  mawk_args = {
+//     {.handle = &mawk_arg_i_handler},
+// }
+
+// #MM_
+    
+//     struct props {
+//         unsigned int    is_interactive:1,
+//         unsigned int    is_posix:1,
+//         unsigned int    has_e:1,
+//         unsigned int    has_f:1,
+//         //unsigned int    is_:1,
+//         char *          pfile_name,
+//         PFILE *         pfile_list,
+//     }
+
+//     begin() {
+
+//     }
+
+//     end() {
+
+//     }
+
+//     %%
+
+//     "-i" "--interactive" (*opts) {
+//         opts->is_interactive = 1;
+//         setbuf( stdout, (char *)0 );
+//         return true;
+//     }
+
+//     "--" (*opts) {
+
+//     }
+
+//     "--FS" (*opts) {
+//         // recognize escape sequences
+//         const size_t len = rm_escape( argv[i] );
+//         cell_destroy( FS );
+//         FS->type = C_STRING;
+//         FS->ptr  = new_STRING2( argv[i], len );
+//         cast_for_split(
+//             cellcpy( &fs_shadow, FS )
+//         );
+//     }
+
+// #
+
+// typedef struct mawk_arg_def {
+//     mm_arg[]    defs,
+// } mawk_opt;a
+
 
 static void
 process_cmdline( int argc, char ** argv )
 {
-   
+    // unsigned char a = 'a';
+    // unsigned char A = 'A';
+    // unsigned char z = 'z';
+    // unsigned char Z = 'Z';
+    // unsigned char dash = '-';
+    // printf("\na=%u A=%u z=%u Z=%u -=%u\n",a,A,z,Z,dash);
+    // exit_no_program();
+
     int     i;
     PFILE   dummy; /* starts linked list of filenames */
     PFILE * tail = &dummy;

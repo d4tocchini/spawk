@@ -19,14 +19,19 @@ you agree to not name that product mawk.
 #include "jmp.h"
 #include "field.h"
 
-static CODEBLOCK * new_code( void );
+// static CODEBLOCK * code_create_block( void );
 
-CODEBLOCK active_code;
+CODEBLOCK   active_code;
+CODEBLOCK * main_code_p;
+CODEBLOCK * begin_code_p;
+CODEBLOCK * end_code_p;
 
-CODEBLOCK *main_code_p, *begin_code_p, *end_code_p;
+INST * begin_start;
+INST * main_start;
+INST * end_start;
 
-INST *   begin_start, *main_start, *end_start;
-unsigned begin_size, main_size;
+unsigned begin_size;
+unsigned main_size;
 
 // INST *execution_start = 0 ;
 
@@ -100,8 +105,7 @@ code2op( int x, int y )
 void
 code_init( void )
 {
-    main_code_p = new_code();
-
+    main_code_p = code_create_block();
     active_code = *main_code_p;
     code1( _OMAIN );
 }
@@ -144,14 +148,13 @@ set_code( void )
 
     /* set the BEGIN code */
     if ( begin_code_p ) {
-        active_code = *begin_code_p;
+        active_code     = *begin_code_p;
         if ( main_start )
             code2op( _JMAIN, _HALT );
         else
             code2op( _EXIT0, _HALT );
-        *begin_code_p = active_code;
-        begin_start   = code_shrink( begin_code_p, &begin_size );
-
+        *begin_code_p   = active_code;
+        begin_start     = code_shrink( begin_code_p, &begin_size );
         execution_start = begin_start;
     }
 
@@ -181,8 +184,8 @@ dump_code( void )
     }
 }
 
-static CODEBLOCK *
-new_code( void )
+CODEBLOCK *
+code_create_block( void )
 {
     CODEBLOCK * p = ZMALLOC( CODEBLOCK );
 
@@ -192,23 +195,4 @@ new_code( void )
     p->ptr   = p->base;
 
     return p;
-}
-
-/* moves the active_code from MAIN to a BEGIN or END */
-
-void
-be_setup( int scope )
-{
-    *main_code_p = active_code;
-
-    if ( scope == SCOPE_BEGIN ) {
-        if ( !begin_code_p )
-            begin_code_p = new_code();
-        active_code = *begin_code_p;
-    }
-    else {
-        if ( !end_code_p )
-            end_code_p = new_code();
-        active_code = *end_code_p;
-    }
 }

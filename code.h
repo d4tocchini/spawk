@@ -21,53 +21,60 @@ you agree to not name that product mawk.
 
 #include "memory.h"
 
-#define  PAGESZ	512
-	/* number of code instructions allocated at one time */
-#define  CODEWARN        16
+#define  CODEWARN       16
+
+/* number of code instructions allocated at one time */
+#define  PAGESZ	        512
 
 /* coding scope */
 #define   SCOPE_MAIN    0
-#define   SCOPE_BEGIN   1  
+#define   SCOPE_BEGIN   1
 #define   SCOPE_END     2
 #define   SCOPE_FUNCT   3
 
-
 typedef struct {
-INST *base, *limit, *warn, *ptr ;
+    INST *base,
+    *limit,
+    *warn,
+    *ptr ;
 } CODEBLOCK ;
 
-extern CODEBLOCK active_code ;
-extern CODEBLOCK *main_code_p, *begin_code_p, *end_code_p ;
+extern CODEBLOCK   active_code   ;
+extern CODEBLOCK * main_code_p  ;
+extern CODEBLOCK * begin_code_p ;
+extern CODEBLOCK * end_code_p   ;
 
-extern INST *main_start, *begin_start, *end_start  ;
-extern unsigned main_size, begin_size  ;
-extern INST *execution_start ;
-extern INST *next_label ;  /* next statements jump to here */
-extern int dump_code_flag ;
+extern INST *   main_start;
+extern INST *   begin_start;
+extern INST *   end_start;
+extern INST *   execution_start;
+extern INST *   next_label;  /* next statements jump to here */
+extern unsigned main_size ;
+extern unsigned begin_size;
+extern int      dump_code_flag;
+extern int      exit_code;
+extern CELL     eval_stack[] ;
 
-#define code_ptr  active_code.ptr
-#define code_base active_code.base
-#define code_warn active_code.warn
-#define code_limit active_code.limit
-#define code_offset (code_ptr-code_base)
+#define code_ptr    active_code.ptr
+#define code_base   active_code.base
+#define code_warn   active_code.warn
+#define code_limit  active_code.limit
+#define code_offset (code_ptr - code_base)
+#define code1(x)    code_ptr++ -> op = (x)
+#define code2(x,p)  xcode2(x,(PTR)(p))
 
 #define INST_BYTES(x) (sizeof(INST)*(unsigned)(x))
-
-extern  CELL  eval_stack[] ;
-extern int exit_code ;
-
-
-#define  code1(x)  code_ptr++ -> op = (x)
-#define  code2(x,p)  xcode2(x,(PTR)(p))
 
 void   xcode2(int, PTR) ;
 void   code2op(int, int) ;
 INST * code_shrink(CODEBLOCK*, unsigned*) ;
 void   code_grow(void) ;
 void   set_code(void) ;
-void   be_setup(int) ;
+// void   code_open_BEGIN(void) ;
+// void   code_open_END(void) ;
+// void   code_close_active(void) ;
 void   dump_code(void) ;
-
+CODEBLOCK * code_create_block( void ) ;
 
 /*  the machine opcodes  */
 /* to avoid confusion with a ptr FE_PUSHA must have op code 0 */

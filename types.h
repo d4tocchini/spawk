@@ -70,7 +70,7 @@ typedef struct {
 #define STRING_dup( s ) ( ( (STRING *)( s ) )->ref_cnt++, (STRING *)( s ) )
 
 /* like strcmp() */
-int STRING_cmp( STRING *, STRING * );
+int STRING_cmp( const STRING *, const STRING * );
 
 typedef struct cell {
     int    type;

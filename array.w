@@ -175,15 +175,15 @@ static void array_split_to_str(ARRAY A)
     unsigned i ;
     CELL* cells = (CELL*)A->ptr ;
     for(i=1; i <= A->size; i++) {
-	size_t unused ;
+	    size_t unused ;
         char buffer[128] ;
         STRING* sval ;
-        CELL* cp ; 
-	sprintf(buffer, "%u" , i) ;
-	sval = new_STRING(buffer) ;
-	cp = itable_find(tb, sval, 0, CREATE, &unused) ;
-	*cp = cells[i-1] ; /* no ref cnt adjustment needed */
-	free_STRING(sval) ;
+        CELL* cp ;
+	    sprintf(buffer, "%u" , i) ;
+	    sval = new_STRING(buffer) ;
+	    cp = itable_find(tb, sval, 0, CREATE, &unused) ;
+	    *cp = cells[i-1] ; /* no ref cnt adjustment needed */
+	    free_STRING(sval) ;
     }
     zfree(cells, sizeof(CELL) * A->size) ;
     A->type = AY_STR ;

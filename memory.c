@@ -22,7 +22,7 @@ STRING         null_str      = { 0, 1, "" };
 STRING * const the_empty_str = &null_str;
 
 static STRING *
-xnew_STRING( size_t len )
+xnew_STRING(const size_t len )
 {
     STRING * sval = (STRING *)zmalloc( STRING_SIZE( len ) );
 
@@ -35,7 +35,7 @@ xnew_STRING( size_t len )
 /* allocate space for a STRING */
 
 STRING *
-new_STRING0( size_t len )
+new_STRING0( const size_t len )
 {
     if ( len == 0 ) {
         return STRING_dup( the_empty_str );
@@ -48,7 +48,7 @@ new_STRING0( size_t len )
 /* memcpy into a STRING */
 
 STRING *
-new_STRING2( const char * s, size_t len )
+new_STRING2( const char * s, const size_t len )
 {
     if ( len == 0 ) {
         return STRING_dup( the_empty_str );
@@ -71,7 +71,7 @@ new_STRING( const char * s )
 
 /* compare two strings in manner of strcmp  */
 int
-STRING_cmp( STRING * s1, STRING * s2 )
+STRING_cmp( const STRING * s1, const STRING * s2 )
 {
     int    ret;
     size_t len1 = s1->len;

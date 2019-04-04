@@ -52,7 +52,6 @@ code_jmp( int jtype, INST * target )
         code2op( jtype, target - ( code_ptr + 1 ) );
     else {
         register JMP * p = ZMALLOC( JMP );
-
         /* stack for back patch */
         code2op( jtype, 0 );
         p->source_offset = code_offset - 1;

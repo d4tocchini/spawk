@@ -24,8 +24,8 @@ you agree to not name that product mawk.
 
 
 STRING *new_STRING(const char*) ;
-STRING *new_STRING0(size_t) ;
-STRING* new_STRING2(const char*,size_t) ;
+STRING *new_STRING0(const size_t) ;
+STRING* new_STRING2(const char*, const size_t) ;
 
 #ifdef   DEBUG
 void  DB_free_STRING(STRING *) ;
