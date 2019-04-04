@@ -210,18 +210,18 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 168 "parse.y" /* yacc.c:1927  */
+#line 159 "parse.y" /* yacc.c:1927  */
 
-    CELL     *  cp      ;
-    SYMTAB   *  stp     ;
-    int         start   ; /* code starting address as offset from code_base */
-    PF_CP       fp      ; /* ptr to a (print/printf) or (sub/gsub) function */
-    BI_REC   *  bip     ; /* ptr to info about a builtin */
-    FBLOCK   *  fbp     ; /* ptr to a function block */
-    ARG2_REC *  arg2p   ;
-    CA_REC   *  ca_p    ;
-    int         ival    ;
-    PTR         ptr     ;
+    CELL     *      cp          ;
+    SYMTAB   *      stp         ;
+    int             start       ; /* code starting address as offset from code_base */
+    PF_CP           fp          ; /* ptr to a (print/printf) or (sub/gsub) function */
+    BI_REC   *      bip         ; /* ptr to info about a builtin */
+    FBLOCK   *      fbp         ; /* ptr to a function block */
+    ARG2_REC *      arg2p       ;
+    CA_REC   *      ca_p        ;
+    int             ival        ;
+    PTR             ptr         ;
 
 #line 227 "y.tab.h" /* yacc.c:1927  */
 };
