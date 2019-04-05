@@ -1,6 +1,6 @@
 
 /********************************************
-makescan.c
+scancode.src.c
 copyright 1991,2014-2016 Michael D. Brennan
 
 This is a source file for mawk, an implementation of
@@ -13,8 +13,8 @@ If you import elements of this code into another product,
 you agree to not name that product mawk.
 ********************************************/
 
-/* source for makescan.exe which builds the scancode[]
-   via:	  makescan.exe > scancode.c
+/* source for scancode.src.exe which builds the scancode[]
+   via:	  scancode.src.exe > scancode.c
 */
 
 #include <string.h>
@@ -82,7 +82,7 @@ scan_print( const char * date )
     register int   r; /* row */
 
     printf( "\n\n/* scancode.c */\n" );
-    printf( "/* generated from makescan.c */\n" );
+    printf( "/* generated from scancode.src.c */\n" );
     printf( "/* %s */\n\n\n", date );
     printf( "int scan_code[256] = {\n" );
 

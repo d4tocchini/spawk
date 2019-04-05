@@ -195,10 +195,9 @@ _code_close_active( int * scope ) // switch_code_to_main(void)
 %nonassoc           IO_IN PIPE
 %right              POW
 %left   <ival>      INC_or_DEC
-%left               DOLLAR    FIELD  /* last to remove a SR conflict
-                                    with getline */
-%right              LPAREN  RPAREN     /* removes some SR conflicts */
-    
+%left               DOLLAR  FIELD   /* last to remove a SR conflict with getline */
+%right              LPAREN  RPAREN  /* removes some SR conflicts */
+
 %token  <ptr>       DOUBLE    STRING_     RE
 %token  <stp>       ID        D_ID
 %token  <fbp>       FUNCT_ID
@@ -1382,7 +1381,3 @@ parse(void) {
         mawk_exit(0) ;
     }
 }
-
-
-
-

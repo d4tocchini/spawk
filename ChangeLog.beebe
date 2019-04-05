@@ -173,7 +173,9 @@ kw.c:
 main.c:
 	Convert K&R function definitions to c89 syntax.
 
-makescan.c:
+scancode.c:
+	makescan.c renamed to scancode.c
+
 	Convert K&R function definitions to c89 syntax.
 
 	Fix bug caught by C++ compilers: close(fp) should be

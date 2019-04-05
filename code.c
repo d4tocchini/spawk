@@ -75,12 +75,10 @@ void
 xcode2( int op, void * ptr )
 {
     register INST * p = code_ptr + 2;
-
     if ( p >= code_warn ) {
         code_grow();
         p = code_ptr + 2;
     }
-
     p[-2].op  = op;
     p[-1].ptr = ptr;
     code_ptr  = p;

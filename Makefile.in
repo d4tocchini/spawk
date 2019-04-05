@@ -154,11 +154,11 @@ printf.c : printf.w
 printf.h : printf.w
 	notangle -R'"printf.h"' printf.w | cpif printf.h
 
-scancode.c :  makescan.c  scan.h
-	$(CC) -o makescan.exe  makescan.c
+scancode.c :  scancode.src.c  scan.h
+	$(CC) -o scancode.src.exe  scancode.src.c
 	rm -f scancode.c
-	./makescan.exe > scancode.c
-	rm makescan.exe
+	./scancode.src.exe > scancode.c
+	rm scancode.src.exe
 
 mawk : $(REXP_OBJS) $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS) -I./ -Irexp $(LDFLAGS)
