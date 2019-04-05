@@ -38,19 +38,40 @@ typedef union               {   // an element of code (instruction)
                             }
 INST;
 //                          CELLtypes
-enum {      
-    C_NOINIT,
-    C_DOUBLE,
-    C_STRING,
-    C_STRNUM,
-    C_MBSTRN,                   // could be STRNUM, hasnt been checked
-    C_RE,
-    C_SPACE,                    // split on space
-    C_SNULL,                    // split on the empty string
-    C_REPL,                     // a replacement string '\&' changedto &
-    C_REPLV,                    // a vector replacement -- broken on &
-    NUM_CELL_TYPES
-};
+
+#define         C_NOINIT             0
+#define         C_DOUBLE             1
+#define         C_STRING             2
+#define         C_STRNUM             3
+#define         C_MBSTRN             4   // could be STRNUM, hasnt been checked
+#define         C_RE                 5
+#define         C_SPACE              6   // split on space
+#define         C_SNULL              7   // split on the empty string
+#define         C_REPL               8   // a replacement string '\&' changedto &
+#define         C_REPLV              9   // a vector replacement -- broken on &
+#define         NUM_CELL_TYPES      10
+
+//                              these defines are used to check types for two
+//                              CELLs which are adjacent in memory
+#define         TWO_NOINITS         ( ( 1 << (C_NOINIT + 1) ) )
+#define         TWO_DOUBLES         ( ( 1 << (C_DOUBLE + 1) ) )
+#define         TWO_STRINGS         ( ( 1 << (C_STRING + 1) ) )
+#define         TWO_STRNUMS         ( ( 1 << (C_STRNUM + 1) ) )
+#define         TWO_MBSTRNS         ( ( 1 << (C_MBSTRN + 1) ) )
+#define         NOINIT_AND_DOUBLE   ( ( 1 << C_NOINIT ) + ( 1 << C_DOUBLE ) )
+#define         NOINIT_AND_STRING   ( ( 1 << C_NOINIT ) + ( 1 << C_STRING ) )
+#define         NOINIT_AND_STRNUM   ( ( 1 << C_NOINIT ) + ( 1 << C_STRNUM ) )
+#define         DOUBLE_AND_STRING   ( ( 1 << C_DOUBLE ) + ( 1 << C_STRING ) )
+#define         DOUBLE_AND_STRNUM   ( ( 1 << C_STRNUM ) + ( 1 << C_DOUBLE ) )
+#define         STRING_AND_STRNUM   ( ( 1 << C_STRING ) + ( 1 << C_STRNUM ) )
+#define         NOINIT_AND_MBSTRN   ( ( 1 << C_NOINIT ) + ( 1 << C_MBSTRN ) )
+#define         DOUBLE_AND_MBSTRN   ( ( 1 << C_DOUBLE ) + ( 1 << C_MBSTRN ) )
+#define         STRING_AND_MBSTRN   ( ( 1 << C_STRING ) + ( 1 << C_MBSTRN ) )
+#define         STRNUM_AND_MBSTRN   ( ( 1 << C_STRNUM ) + ( 1 << C_MBSTRN ) )
+
+#define         CELL_PAIR_TYPE(cp)  ( ( 1 << ( cp )->type ) + ( 1 << ( ( cp ) + 1 )->type ) )
+
+
 
 //                          STRING
 typedef struct              {
@@ -81,24 +102,6 @@ STRING;
 //                          like strcmp()
 int                         STRING_cmp( const STRING *, const STRING * );
 
-//                          these defines are used to check types for two
-//                          CELLs which are adjacent in memory
-
-#define         TWO_NOINITS         ( 2 * ( 1 << C_NOINIT ) )
-#define         TWO_DOUBLES         ( 2 * ( 1 << C_DOUBLE ) )
-#define         TWO_STRINGS         ( 2 * ( 1 << C_STRING ) )
-#define         TWO_STRNUMS         ( 2 * ( 1 << C_STRNUM ) )
-#define         TWO_MBSTRNS         ( 2 * ( 1 << C_MBSTRN ) )
-#define         NOINIT_AND_DOUBLE   ( ( 1 << C_NOINIT ) + ( 1 << C_DOUBLE ) )
-#define         NOINIT_AND_STRING   ( ( 1 << C_NOINIT ) + ( 1 << C_STRING ) )
-#define         NOINIT_AND_STRNUM   ( ( 1 << C_NOINIT ) + ( 1 << C_STRNUM ) )
-#define         DOUBLE_AND_STRING   ( ( 1 << C_DOUBLE ) + ( 1 << C_STRING ) )
-#define         DOUBLE_AND_STRNUM   ( ( 1 << C_STRNUM ) + ( 1 << C_DOUBLE ) )
-#define         STRING_AND_STRNUM   ( ( 1 << C_STRING ) + ( 1 << C_STRNUM ) )
-#define         NOINIT_AND_MBSTRN   ( ( 1 << C_NOINIT ) + ( 1 << C_MBSTRN ) )
-#define         DOUBLE_AND_MBSTRN   ( ( 1 << C_DOUBLE ) + ( 1 << C_MBSTRN ) )
-#define         STRING_AND_MBSTRN   ( ( 1 << C_STRING ) + ( 1 << C_MBSTRN ) )
-#define         STRNUM_AND_MBSTRN   ( ( 1 << C_STRNUM ) + ( 1 << C_MBSTRN ) )
 
 
 #endif /* MAWK_TYPES_H */

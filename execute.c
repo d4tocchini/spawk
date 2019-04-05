@@ -660,7 +660,7 @@ _mawk_execute(
 
             case _ADD:
                 sp--;
-                if ( TEST2( sp ) != TWO_DOUBLES )
+                if ( CELL_PAIR_TYPE( sp ) != TWO_DOUBLES )
                     cast2_to_d( sp );
 #if SW_FP_CHECK
                 clrerr();
@@ -673,7 +673,7 @@ _mawk_execute(
 
             case _SUB:
                 sp--;
-                if ( TEST2( sp ) != TWO_DOUBLES )
+                if ( CELL_PAIR_TYPE( sp ) != TWO_DOUBLES )
                     cast2_to_d( sp );
 #if SW_FP_CHECK
                 clrerr();
@@ -686,7 +686,7 @@ _mawk_execute(
 
             case _MUL:
                 sp--;
-                if ( TEST2( sp ) != TWO_DOUBLES )
+                if ( CELL_PAIR_TYPE( sp ) != TWO_DOUBLES )
                     cast2_to_d( sp );
 #if SW_FP_CHECK
                 clrerr();
@@ -699,7 +699,7 @@ _mawk_execute(
 
             case _DIV:
                 sp--;
-                if ( TEST2( sp ) != TWO_DOUBLES )
+                if ( CELL_PAIR_TYPE( sp ) != TWO_DOUBLES )
                     cast2_to_d( sp );
 
 #if NOINFO_SIGFPE
@@ -717,7 +717,7 @@ _mawk_execute(
 
             case _MOD:
                 sp--;
-                if ( TEST2( sp ) != TWO_DOUBLES )
+                if ( CELL_PAIR_TYPE( sp ) != TWO_DOUBLES )
                     cast2_to_d( sp );
 
 #if NOINFO_SIGFPE
@@ -729,7 +729,7 @@ _mawk_execute(
 
             case _POW:
                 sp--;
-                if ( TEST2( sp ) != TWO_DOUBLES )
+                if ( CELL_PAIR_TYPE( sp ) != TWO_DOUBLES )
                     cast2_to_d( sp );
                 sp[0].dval = pow( sp[0].dval, sp[1].dval );
                 break;
@@ -805,7 +805,7 @@ _mawk_execute(
                 STRING * b;
 
                 sp--;
-                if ( TEST2( sp ) != TWO_STRINGS )
+                if ( CELL_PAIR_TYPE( sp ) != TWO_STRINGS )
                     cast2_to_s( sp );
                 str1 = string( sp )->str;
                 len1 = string( sp )->len;
@@ -1150,7 +1150,7 @@ _mawk_execute(
                     set_field0( p, len );
                     cdp = restart_label;
 
-                    if ( TEST2( NR ) != TWO_DOUBLES )
+                    if ( CELL_PAIR_TYPE( NR ) != TWO_DOUBLES )
                         cast2_to_d( NR );
 
                     NR->dval += 1.0;
@@ -1324,7 +1324,7 @@ compare( CELL * cp )
 
 reswitch:
 
-    switch ( TEST2( cp ) ) {
+    switch ( CELL_PAIR_TYPE( cp ) ) {
         case TWO_NOINITS:
             return 0;
 

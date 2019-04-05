@@ -80,8 +80,7 @@ extern char * string_buff_end;
 
 char * enlarge_string_buff( char * );
 
-/* help with casts */
-extern int mpow2[];
+
 
 /* these are used by the parser, scanner and error messages
     from the compile  */
@@ -110,9 +109,6 @@ int mawk_state;     /* 0 is compiling */
 // typedef struct mawk_ctx {
 //     state
 // } mawk_ctx;
-
-/* macro to test the type of two adjacent cells */
-#define TEST2( cp ) ( mpow2[( cp )->type] + mpow2[( ( cp ) + 1 )->type] )
 
 /* macro to get at the string part of a CELL */
 #define string( cp ) ( (STRING *)( cp )->ptr )

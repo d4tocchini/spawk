@@ -430,7 +430,7 @@ bi_index( CELL * sp )
     char *       p;
 
     sp--;
-    if ( TEST2( sp ) != TWO_STRINGS )
+    if ( CELL_PAIR_TYPE( sp ) != TWO_STRINGS )
         cast2_to_s( sp );
 
     if ( ( len = string( sp + 1 )->len ) ) {
@@ -481,7 +481,7 @@ bi_substr( CELL * sp )
             cast1_to_d( sp + 1 );
     }
     else {
-        if ( TEST2( sp + 1 ) != TWO_DOUBLES )
+        if ( CELL_PAIR_TYPE( sp + 1 ) != TWO_DOUBLES )
             cast2_to_d( sp + 1 );
         n = d_to_int( sp[2].dval );
     }
@@ -658,7 +658,7 @@ bi_atan2( CELL * sp )
 {
 #if !STDC_MATHERR
     sp--;
-    if ( TEST2( sp ) != TWO_DOUBLES )
+    if ( CELL_PAIR_TYPE( sp ) != TWO_DOUBLES )
         cast2_to_d( sp );
     sp->dval = atan2( sp->dval, ( sp + 1 )->dval );
     return sp;
@@ -666,7 +666,7 @@ bi_atan2( CELL * sp )
 
     errno = 0;
     sp--;
-    if ( TEST2( sp ) != TWO_DOUBLES )
+    if ( CELL_PAIR_TYPE( sp ) != TWO_DOUBLES )
         cast2_to_d( sp );
     sp->dval = atan2( sp->dval, ( sp + 1 )->dval );
     if ( errno )
@@ -1005,7 +1005,7 @@ bi_getline( CELL * sp )
                 goto eof;
 
             cp = (CELL *)sp->ptr;
-            if ( TEST2( NR ) != TWO_DOUBLES )
+            if ( CELL_PAIR_TYPE( NR ) != TWO_DOUBLES )
                 cast2_to_d( NR );
             NR->dval += 1.0;
             rt_nr++;

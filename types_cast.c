@@ -22,8 +22,6 @@ you agree to not name that product mawk.
 #include "repl.h"
 #include "types_int.h"
 
-int mpow2[NUM_CELL_TYPES] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 };
-
 /* modern strtod accepts "inf" "nan" and hex numbers
    awk should not  (gawk and mawk agree on this)
 
