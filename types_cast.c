@@ -30,7 +30,7 @@ int mpow2[NUM_CELL_TYPES] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 };
    maybe if --posix, but stubbed out for now]
 */
 
-int posix_flag = 0;
+#define AWK_USE_POSIX_strtod 0
 
 static double
 awk_strtod( const STRING * sval )
@@ -96,9 +96,11 @@ cast1_to_d( CELL * cp )
         case C_STRING: {
             STRING * sval = (STRING *)cp->ptr;
 
-            cp->dval = posix_flag ? posix_strtod( sval )
-                                  : awk_strtod( sval );
-
+#if AWK_USE_POSIX_strtod
+            cp->dval = posix_strtod( sval );
+#else
+            cp->dval = awk_strtod( sval );
+#endif
             free_STRING( sval );
         } break;
 
