@@ -13,10 +13,10 @@ If you import elements of this code into another product,
 you agree to not name that product mawk.
 ********************************************/
 
-/* memory.c */
+/* types_string.c */
 
 #include "mawk.h"
-#include "memory.h"
+#include "types_string.h"
 
 STRING         null_str      = { 0, 1, "" };
 STRING * const the_empty_str = &null_str;

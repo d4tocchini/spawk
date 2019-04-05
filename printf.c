@@ -24,7 +24,7 @@ It's easiest to read or modify this file by working with printf.w.
 #include "mawk.h"
 #include "scan.h"
 #include "printf.h"
-#include "int.h"
+#include "types_int.h"
 
 static Form* the_forms ;
 static STRING the_nl = {1,1,"\n"} ;
@@ -283,9 +283,18 @@ const char* parse_spec(const char* str, const char* end, Spec* tail)
             case 'd': case 'i':
             case 'o': case 'x': case 'X': case 'u':
                 {
+                        // TODO: HAS_LONG64 handling?
                     size_t len = str+1 - start ;
-                    int delta = (have_long64? 1 : 2) - l_cnt ;
-                        /* delta is number of 'l' to add or remove */
+                    //int delta = (have_long64? 1 : 2) - l_cnt ;
+                    /* delta is number of 'l' to add or remove */
+                        int delta = (
+                #if  HAS_LONG64
+                                1
+                #else
+                                2
+                #endif
+                        ) - l_cnt ;
+
                     char* form ;
 
                     len += delta ;
@@ -299,10 +308,14 @@ const char* parse_spec(const char* str, const char* end, Spec* tail)
                     form[len] = 0 ;
                     form[len-1] = *str ;
                     form[len-2] = 'l' ;
-                    if (!have_long64) {
-                        form[len-3] = 'l' ;
-                    }
-                    memcpy(form, start, len - (have_long64?2:3)) ;
+
+                // if ( !have_long64 ) {
+                //     form[len - 3]= 'l';
+                // }
+                #if  !HAS_LONG64
+                        form[len - 3]= 'l';
+                #endif
+                    memcpy( form, start, len - LONG64_LEN_DEC );
                     spec->form = form ;
                 }
 

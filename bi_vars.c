@@ -20,7 +20,7 @@ you agree to not name that product mawk.
 #include "bi_vars.h"
 #include "field.h"
 #include "init.h"
-#include "memory.h"
+#include "types_string.h"
 
 /* the builtin variables */
 CELL bi_vars[NUM_BI_VAR];

@@ -1040,7 +1040,7 @@ static STRING** itable_s_vector(ITable*) ;
 #define ARRAY_H 1
 
 #include "types.h"
-#include "int.h"
+#include "types_int.h"
 
 <<array typedefs and [[#defines]]>>
 <<interface prototypes>>
@@ -1051,7 +1051,7 @@ static STRING** itable_s_vector(ITable*) ;
 <<blurb>>
 #include "mawk.h"
 #include "table.h"
-#include "memory.h"
+#include "types_string.h"
 #include "split.h"
 #include "field.h"
 #include "bi_vars.h"

@@ -16,7 +16,7 @@ you agree to not name that product mawk.
 /* table.c */
 
 #include "mawk.h"
-#include "memory.h"
+#include "types_string.h"
 #include "table.h"
 
 typedef struct hash {

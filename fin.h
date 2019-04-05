@@ -20,14 +20,14 @@ you agree to not name that product mawk.
 /* structure to control input files */
 
 typedef struct {
-int  fd ;
-FILE *fp ;   
-char *buff ; /* base */
-char *start ; /* start of next record */
-char* end ;   /* end of data in buff[] */
-size_t buffsz ; /* size of buff[] */
-int  flags ;
-int  close_val ;   /* return value for close */
+    int     fd ;
+    FILE *  fp ;
+    char *  buff ; /* base */
+    char *  start ; /* start of next record */
+    char*   end ;   /* end of data in buff[] */
+    size_t  buffsz ; /* size of buff[] */
+    int     flags ;
+    int     close_val ;   /* return value for close */
 }  FIN ;
 
 /* fd and fp in FIN: three possiblities.

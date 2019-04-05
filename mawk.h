@@ -18,6 +18,31 @@ you agree to not name that product mawk.
 #ifndef MAWK_H
 #define MAWK_H
 
+
+
+#define EVAL_STACK_SIZE  256	/* initial size , can grow */
+
+/*
+ * FBANK_SZ, the number of fields at startup, must be a power of 2.
+ *
+ */
+#define  FBANK_SZ	      1024
+#define  FB_SHIFT	      10	/* lg(FBANK_SZ) */
+
+/*
+ * initial size of sprintf buffer
+ */
+#define  SPRINTF_LIMIT	8192
+
+#define  BUFFSZ         4096
+#define  FINBUFFSZ      8192
+  /* starting buffer size for input files, grows if
+     necessary */
+
+#define  MAX_COMPILE_ERRORS  5	/* quit if more than 4 errors */
+
+
+
 typedef void * PTR;
 typedef int    Bool;
 

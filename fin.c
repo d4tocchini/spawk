@@ -17,7 +17,7 @@ you agree to not name that product mawk.
 
 #include "mawk.h"
 #include "fin.h"
-#include "memory.h"
+#include "types_string.h"
 #include "bi_vars.h"
 #include "field.h"
 #include "table.h"

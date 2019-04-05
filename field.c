@@ -15,11 +15,11 @@ you agree to not name that product mawk.
 /* field.c */
 
 #include "mawk.h"
-#include "int.h"
+#include "types_int.h"
 #include "split.h"
 #include "field.h"
 #include "init.h"
-#include "memory.h"
+#include "types_string.h"
 #include "scan.h"
 #include "bi_vars.h"
 #include "repl.h"

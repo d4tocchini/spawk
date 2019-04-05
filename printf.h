@@ -23,7 +23,7 @@ It's easiest to read or modify this file by working with printf.w.
 #define PRINTF_H 1
 #include "mawk.h"
 #include "types.h"
-#include "memory.h"
+#include "types_string.h"
 #include "files.h"
 
 typedef struct form Form ;

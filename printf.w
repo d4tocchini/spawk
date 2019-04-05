@@ -425,9 +425,18 @@ or [["%2llx"]] for the 32 bit long C-library.  The user is allowed to use
 
 <<make the [[spec]] type [[PF_I]] or type [[PF_U]]>>=
 {
+	// TODO: HAS_LONG64 handling?
     size_t len = str+1 - start ;
-    int delta = (have_long64? 1 : 2) - l_cnt ;
-        /* delta is number of 'l' to add or remove */
+    //int delta = (have_long64? 1 : 2) - l_cnt ;
+    /* delta is number of 'l' to add or remove */
+	int delta = (
+#if  HAS_LONG64
+		1
+#else
+		2
+#endif
+	) - l_cnt ;
+
     char* form ;
 
     len += delta ;
@@ -441,10 +450,14 @@ or [["%2llx"]] for the 32 bit long C-library.  The user is allowed to use
     form[len] = 0 ;
     form[len-1] = *str ;
     form[len-2] = 'l' ;
-    if (!have_long64) {
-        form[len-3] = 'l' ;
-    }
-    memcpy(form, start, len - (have_long64?2:3)) ;
+
+// if ( !have_long64 ) {
+//     form[len - 3]= 'l';
+// }
+#if  !HAS_LONG64
+	form[len - 3]= 'l';
+#endif
+    memcpy( form, start, len - LONG64_LEN_DEC );
     spec->form = form ;
 }
 
@@ -1069,7 +1082,7 @@ static void c_or_rt_error_or_silence(const char*,...) ;
 #define PRINTF_H 1
 #include "mawk.h"
 #include "types.h"
-#include "memory.h"
+#include "types_string.h"
 #include "files.h"
 
 <<[[printf]] definitions>>
@@ -1083,7 +1096,7 @@ static void c_or_rt_error_or_silence(const char*,...) ;
 #include "mawk.h"
 #include "scan.h"
 #include "printf.h"
-#include "int.h"
+#include "types_int.h"
 
 <<[[form]] definitions and data>>
 <<static prototypes>>

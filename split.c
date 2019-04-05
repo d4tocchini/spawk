@@ -19,7 +19,7 @@ you agree to not name that product mawk.
 #include "table.h"
 #include "bi_vars.h"
 #include "bi_funct.h"
-#include "memory.h"
+#include "types_string.h"
 #include "scan.h"
 #include "regexp.h"
 #include "repl.h"

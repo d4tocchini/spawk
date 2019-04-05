@@ -18,7 +18,7 @@ you agree to not name that product mawk.
 #include <stdbool.h>
 #include "mawk.h"
 #include "code.h"
-#include "memory.h"
+#include "types_string.h"
 #include "table.h"
 #include "init.h"
 #include "bi_vars.h"

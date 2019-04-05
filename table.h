@@ -20,6 +20,8 @@ you agree to not name that product mawk.
 
 #include "types.h"
 
+#define  HASH_PRIME     113
+
 /* struct to hold info about builtins */
 typedef struct {
     const char *  name;

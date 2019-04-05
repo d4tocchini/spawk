@@ -72,7 +72,7 @@
 #include "mawk.h"
 #include "table.h"
 #include "code.h"
-#include "memory.h"
+#include "types_string.h"
 #include "bi_funct.h"
 #include "bi_vars.h"
 #include "field.h"

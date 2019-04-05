@@ -21,7 +21,7 @@ It's easiest to read or modify this file by working with array.w.
 
 #include "mawk.h"
 #include "table.h"
-#include "memory.h"
+#include "types_string.h"
 #include "split.h"
 #include "field.h"
 #include "bi_vars.h"

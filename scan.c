@@ -15,10 +15,10 @@ you agree to not name that product mawk.
 
 #include "mawk.h"
 #include "scan.h"
-#include "memory.h"
+#include "types_string.h"
 #include "field.h"
 #include "init.h"
-#include "int.h"
+#include "types_int.h"
 #include "fin.h"
 #include "repl.h"
 #include "code.h"

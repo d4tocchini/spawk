@@ -19,7 +19,7 @@ you agree to not name that product mawk.
 #ifndef  CODE_H
 #define  CODE_H
 
-#include "memory.h"
+#include "types_string.h"
 
 /* --------------------- jmp.h --------------------- BEGIN */
 void     BC_new( void );

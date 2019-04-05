@@ -17,10 +17,10 @@ you agree to not name that product mawk.
 
 #include "mawk.h"
 #include "field.h"
-#include "memory.h"
+#include "types_string.h"
 #include "scan.h"
 #include "repl.h"
-#include "int.h"
+#include "types_int.h"
 
 int mpow2[NUM_CELL_TYPES] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 };
 

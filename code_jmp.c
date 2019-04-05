@@ -20,12 +20,11 @@ you agree to not name that product mawk.
    on the stacks
 */
 
-#include "mawk.h"
+#include "mawk.h" // <-- #include "sizes.h"
 #include "table.h"
 #include "code.h"
-#include "sizes.h"
 #include "init.h"
-#include "memory.h"
+#include "types_string.h"
 
 #define error_state ( compile_error_count > 0 )
 

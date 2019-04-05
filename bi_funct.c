@@ -19,9 +19,9 @@ you agree to not name that product mawk.
 #include "mawk.h"
 #include "bi_funct.h"
 #include "bi_vars.h"
-#include "memory.h"
+#include "types_string.h"
 #include "init.h"
-#include "int.h"
+#include "types_int.h"
 #include "files.h"
 #include "fin.h"
 #include "field.h"
@@ -90,7 +90,7 @@ extern void srandom( unsigned int __seed ) THROW__;
 
 // #define xhash(sval) hash2((sval)->str, (sval)->len)
 
-// https://www.tutorialspoint.com/tpcg.php?p=kpclzA
+// https://www.tutorialspotypes_int.com/tpcg.php?p=kpclzA
 // https://stackoverflow.com/questions/4014827/best-way-to-switch-on-a-string-in-c
 #ifndef SWITCH_CASE_INIT
 #define SWITCH_CASE_INIT

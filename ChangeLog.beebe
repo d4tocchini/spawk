@@ -199,7 +199,7 @@ parse.y:
 
 	Convert K&R function definitions to c89 syntax.
 
-print.c:
+prtypes_int.c:
 	Convert K&R function definitions to c89 syntax.
 
 printf.c:

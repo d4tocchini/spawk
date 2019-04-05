@@ -14,7 +14,7 @@ you agree to not name that product mawk.
 ********************************************/
 
 
-/*  memory.h  */
+/*  types_string.h  */
 
 #ifndef  MEMORY_H
 #define  MEMORY_H

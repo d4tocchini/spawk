@@ -36,14 +36,14 @@ files.c
 fin.c
 table.c
 init.c
-int.c
+types_int.c
 code_jmp.c
 table_kw.c
 main.c
 makescan.c
 memory.c
 parse.c
-print.c
+prtypes_int.c
 printf.c
 re_cmpl.c
 scan.c
@@ -67,7 +67,6 @@ printf.h
 regexp.h
 repl.h
 scan.h
-sizes.h
 split.h
 table.h
 types.h

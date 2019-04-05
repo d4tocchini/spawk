@@ -19,7 +19,7 @@ you agree to not name that product mawk.
 
 #include "mawk.h"
 #include "files.h"
-#include "memory.h"
+#include "types_string.h"
 #include "fin.h"
 
 static FILE * tfopen( const char *, const char * );
