@@ -53,11 +53,11 @@ O  := \
  field.o \
  files.o \
  fin.o \
- hash.o \
+ table.o \
  xxhash.o \
  init.o \
  int.o \
- kw.o \
+ table_kw.o \
  main.o \
  memory.o \
  parse.o \
@@ -198,32 +198,32 @@ doc :
 ### ====================================================================
 
 # dependencies computed by compiling with -MMD and makedeps  *.d
-$(OBJDIR)/array.o: array.c mawk.h types.h sizes.h int.h symtype.h array.h memory.h zmalloc.h split.h field.h bi_vars.h
-$(OBJDIR)/bi_funct.o: bi_funct.c mawk.h types.h sizes.h bi_funct.h symtype.h array.h bi_vars.h memory.h zmalloc.h init.h int.h files.h fin.h field.h regexp.h repl.h
-$(OBJDIR)/bi_vars.o: bi_vars.c mawk.h types.h sizes.h symtype.h array.h bi_vars.h field.h init.h memory.h zmalloc.h
-$(OBJDIR)/cast.o: cast.c mawk.h types.h sizes.h field.h memory.h zmalloc.h scan.h symtype.h array.h parse.h repl.h int.h
-$(OBJDIR)/code.o: code.c mawk.h types.h sizes.h code.h memory.h zmalloc.h init.h symtype.h array.h field.h
-$(OBJDIR)/da.o: da.c mawk.h types.h sizes.h code.h memory.h zmalloc.h bi_funct.h symtype.h array.h repl.h field.h printf.h files.h
-$(OBJDIR)/error.o: error.c mawk.h types.h sizes.h scan.h symtype.h array.h parse.h bi_vars.h
-$(OBJDIR)/execute.o: execute.c mawk.h types.h sizes.h code.h memory.h zmalloc.h symtype.h array.h int.h field.h bi_funct.h bi_vars.h regexp.h repl.h fin.h
-$(OBJDIR)/fcall.o: fcall.c mawk.h types.h sizes.h symtype.h array.h code.h memory.h zmalloc.h
-$(OBJDIR)/field.o: field.c mawk.h types.h sizes.h int.h split.h field.h init.h symtype.h array.h memory.h zmalloc.h scan.h parse.h bi_vars.h repl.h regexp.h
+$(OBJDIR)/array.o: array.c mawk.h types.h sizes.h int.h table.h array.h memory.h zmalloc.h split.h field.h bi_vars.h
+$(OBJDIR)/bi_funct.o: bi_funct.c mawk.h types.h sizes.h bi_funct.h table.h array.h bi_vars.h memory.h zmalloc.h init.h int.h files.h fin.h field.h regexp.h repl.h
+$(OBJDIR)/bi_vars.o: bi_vars.c mawk.h types.h sizes.h table.h array.h bi_vars.h field.h init.h memory.h zmalloc.h
+$(OBJDIR)/cast.o: cast.c mawk.h types.h sizes.h field.h memory.h zmalloc.h scan.h table.h array.h parse.h repl.h int.h
+$(OBJDIR)/code.o: code.c mawk.h types.h sizes.h code.h memory.h zmalloc.h init.h table.h array.h field.h
+$(OBJDIR)/da.o: da.c mawk.h types.h sizes.h code.h memory.h zmalloc.h bi_funct.h table.h array.h repl.h field.h printf.h files.h
+$(OBJDIR)/error.o: error.c mawk.h types.h sizes.h scan.h table.h array.h parse.h bi_vars.h
+$(OBJDIR)/execute.o: execute.c mawk.h types.h sizes.h code.h memory.h zmalloc.h table.h array.h int.h field.h bi_funct.h bi_vars.h regexp.h repl.h fin.h
+$(OBJDIR)/fcall.o: fcall.c mawk.h types.h sizes.h table.h array.h code.h memory.h zmalloc.h
+$(OBJDIR)/field.o: field.c mawk.h types.h sizes.h int.h split.h field.h init.h table.h array.h memory.h zmalloc.h scan.h parse.h bi_vars.h repl.h regexp.h
 $(OBJDIR)/files.o: files.c mawk.h types.h sizes.h files.h memory.h zmalloc.h fin.h
-$(OBJDIR)/fin.o: fin.c mawk.h types.h sizes.h fin.h memory.h zmalloc.h bi_vars.h field.h symtype.h array.h scan.h parse.h
-$(OBJDIR)/hash.o: hash.c mawk.h types.h sizes.h memory.h zmalloc.h symtype.h array.h
-$(OBJDIR)/init.o: init.c mawk.h types.h sizes.h code.h memory.h zmalloc.h symtype.h array.h init.h bi_vars.h field.h
+$(OBJDIR)/fin.o: fin.c mawk.h types.h sizes.h fin.h memory.h zmalloc.h bi_vars.h field.h table.h array.h scan.h parse.h
+$(OBJDIR)/table.o: table.c mawk.h types.h sizes.h memory.h zmalloc.h table.h array.h
+$(OBJDIR)/init.o: init.c mawk.h types.h sizes.h code.h memory.h zmalloc.h table.h array.h init.h bi_vars.h field.h
 $(OBJDIR)/int.o: int.c int.h
-$(OBJDIR)/code_jmp.o: code_jmp.c mawk.h types.h sizes.h symtype.h array.h code.h memory.h zmalloc.h init.h
-$(OBJDIR)/kw.o: kw.c mawk.h types.h sizes.h symtype.h array.h parse.h init.h
-$(OBJDIR)/main.o: main.c mawk.h types.h sizes.h init.h symtype.h array.h code.h memory.h zmalloc.h files.h
+$(OBJDIR)/code_jmp.o: code_jmp.c mawk.h types.h sizes.h table.h array.h code.h memory.h zmalloc.h init.h
+$(OBJDIR)/table_kw.o: table_kw.c mawk.h types.h sizes.h table.h array.h parse.h init.h
+$(OBJDIR)/main.o: main.c mawk.h types.h sizes.h init.h table.h array.h code.h memory.h zmalloc.h files.h
 $(OBJDIR)/memory.o: memory.c mawk.h types.h sizes.h memory.h zmalloc.h
-$(OBJDIR)/parse.o: parse.c mawk.h types.h sizes.h symtype.h array.h code.h memory.h zmalloc.h bi_funct.h bi_vars.h field.h files.h printf.h
-$(OBJDIR)/print.o: print.c mawk.h types.h sizes.h bi_vars.h bi_funct.h symtype.h array.h memory.h zmalloc.h field.h scan.h parse.h files.h int.h printf.h
-$(OBJDIR)/printf.o: printf.c mawk.h types.h sizes.h scan.h symtype.h array.h parse.h printf.h memory.h zmalloc.h files.h int.h
-$(OBJDIR)/re_cmpl.o: re_cmpl.c mawk.h types.h sizes.h memory.h zmalloc.h scan.h symtype.h array.h parse.h regexp.h repl.h split.h
-$(OBJDIR)/scan.o: scan.c mawk.h types.h sizes.h scan.h symtype.h array.h parse.h memory.h zmalloc.h field.h init.h int.h fin.h repl.h code.h files.h
+$(OBJDIR)/parse.o: parse.c mawk.h types.h sizes.h table.h array.h code.h memory.h zmalloc.h bi_funct.h bi_vars.h field.h files.h printf.h
+$(OBJDIR)/print.o: print.c mawk.h types.h sizes.h bi_vars.h bi_funct.h table.h array.h memory.h zmalloc.h field.h scan.h parse.h files.h int.h printf.h
+$(OBJDIR)/printf.o: printf.c mawk.h types.h sizes.h scan.h table.h array.h parse.h printf.h memory.h zmalloc.h files.h int.h
+$(OBJDIR)/re_cmpl.o: re_cmpl.c mawk.h types.h sizes.h memory.h zmalloc.h scan.h table.h array.h parse.h regexp.h repl.h split.h
+$(OBJDIR)/scan.o: scan.c mawk.h types.h sizes.h scan.h table.h array.h parse.h memory.h zmalloc.h field.h init.h int.h fin.h repl.h code.h files.h
 $(OBJDIR)/scancode.o: scancode.c
-$(OBJDIR)/split.o: split.c mawk.h types.h sizes.h split.h symtype.h array.h bi_vars.h bi_funct.h memory.h zmalloc.h scan.h parse.h regexp.h repl.h field.h
+$(OBJDIR)/split.o: split.c mawk.h types.h sizes.h split.h table.h array.h bi_vars.h bi_funct.h memory.h zmalloc.h scan.h parse.h regexp.h repl.h field.h
 $(OBJDIR)/version.o: version.c mawk.h types.h sizes.h
 $(OBJDIR)/zmalloc.o: zmalloc.c mawk.h types.h sizes.h zmalloc.h
 

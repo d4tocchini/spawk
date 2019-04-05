@@ -23,7 +23,7 @@ you agree to not name that product mawk.
 #include <stdio.h>
 
 #ifndef   MAKESCAN
-#include  "symtype.h"
+#include  "table.h"
 #include  "parse.h"
 #endif
 
@@ -72,7 +72,7 @@ void                            parse(void);
 int                             yyparse(void);
 void                            scan_cleanup(void);
 int                             yylex(
-                                    YYSTYPE *yylval
+    YYSTYPE *                       yylval
                                 );
 void                            _mawk_yyerror(
                                     YYSTYPE *yylval,

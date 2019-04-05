@@ -148,7 +148,9 @@ fin.h:
 fpe_check.c:
 	Convert K&R function definitions to c89 syntax.
 
-hash.c:
+table.c:
+	hash.c renamed to table.c
+
 	Add preprocessor #define to rename C++ reserved word "delete"
 	to "delete_".
 
@@ -167,7 +169,7 @@ init.c:
 
 	Add support for --help and --version options.
 
-kw.c:
+table_kw.c:
 	Convert K&R function definitions to c89 syntax.
 
 main.c:

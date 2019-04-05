@@ -19,7 +19,7 @@ you agree to not name that product mawk.
 #include "mawk.h"
 #include "code.h"
 #include "memory.h"
-#include "symtype.h"
+#include "table.h"
 #include "init.h"
 #include "bi_vars.h"
 #include "field.h"

@@ -16,7 +16,7 @@ you agree to not name that product mawk.
 #ifndef BI_FUNCT_H
 #define BI_FUNCT_H 1
 
-#include "symtype.h"
+#include "table.h"
 
 extern BI_REC bi_funct[];
 

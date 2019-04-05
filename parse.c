@@ -70,7 +70,7 @@
 
 #include <stdio.h>
 #include "mawk.h"
-#include "symtype.h"
+#include "table.h"
 #include "code.h"
 #include "memory.h"
 #include "bi_funct.h"

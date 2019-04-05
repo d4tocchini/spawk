@@ -34,11 +34,11 @@ fcall.c
 field.c
 files.c
 fin.c
-hash.c
+table.c
 init.c
 int.c
 code_jmp.c
-kw.c
+table_kw.c
 main.c
 makescan.c
 memory.c
@@ -69,7 +69,7 @@ repl.h
 scan.h
 sizes.h
 split.h
-symtype.h
+table.h
 types.h
 zmalloc.h
 array.w

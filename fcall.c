@@ -14,7 +14,7 @@ you agree to not name that product mawk.
 ********************************************/
 
 #include "mawk.h"
-#include "symtype.h"
+#include "table.h"
 #include "code.h"
 
 /* This file has functions involved with type checking of

@@ -16,7 +16,7 @@ you agree to not name that product mawk.
 /* bi_vars.c */
 
 #include "mawk.h"
-#include "symtype.h"
+#include "table.h"
 #include "bi_vars.h"
 #include "field.h"
 #include "init.h"

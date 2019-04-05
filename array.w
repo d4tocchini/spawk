@@ -1050,7 +1050,7 @@ static STRING** itable_s_vector(ITable*) ;
 /* array.c */
 <<blurb>>
 #include "mawk.h"
-#include "symtype.h"
+#include "table.h"
 #include "memory.h"
 #include "split.h"
 #include "field.h"

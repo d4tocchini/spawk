@@ -1,6 +1,6 @@
 
 /********************************************
-kw.c
+table_kw.c
 copyright 1991,2014-2016 Michael D. Brennan
 
 This is a source file for mawk, an implementation of
@@ -13,10 +13,10 @@ If you import elements of this code into another product,
 you agree to not name that product mawk.
 ********************************************/
 
-/* kw.c */
+/* table_kw.c */
 
 #include "mawk.h"
-#include "symtype.h"
+#include "table.h"
 #include "parse.h"
 #include "init.h"
 
@@ -24,31 +24,31 @@ const static struct kw {
     const char * text;
     short        kw;
 } keywords[] = {
-    { "print", PRINT },
-    { "printf", PRINTF },
-    { "do", DO },
-    { "while", WHILE },
-    { "for", FOR },
-    { "break", BREAK },
-    { "continue", CONTINUE },
-    { "if", IF },
-    { "else", ELSE },
-    { "in", IN },
-    { "delete", DELETE },
-    { "split", SPLIT },
-    { "length", LENGTH },
-    { "match", MATCH_FUNC },
-    { "BEGIN", BEGIN },
-    { "END", END },
-    { "exit", EXIT },
-    { "next", NEXT },
-    { "nextfile", NEXTFILE },
-    { "return", RETURN },
-    { "getline", GETLINE },
-    { "sub", SUB },
-    { "gsub", GSUB },
-    { "sprintf", SPRINTF },
-    { "function", FUNCTION },
+    { "BEGIN"       ,   BEGIN },
+    { "break"       ,   BREAK },
+    { "continue"    ,   CONTINUE },
+    { "do"          ,   DO },
+    { "delete"      ,   DELETE },
+    { "else"        ,   ELSE },
+    { "exit"        ,   EXIT },
+    { "END"         ,   END },
+    { "for"         ,   FOR },
+    { "function"    ,   FUNCTION },
+    { "getline"     ,   GETLINE },
+    { "gsub"        ,   GSUB },
+    { "if"          ,   IF },
+    { "in"          ,   IN },
+    { "length"      ,   LENGTH },
+    { "match"       ,   MATCH_FUNC },
+    { "next"        ,   NEXT },
+    { "nextfile"    ,   NEXTFILE },
+    { "print"       ,   PRINT },
+    { "printf"      ,   PRINTF },
+    { "return"      ,   RETURN },
+    { "split"       ,   SPLIT },
+    { "sprintf"     ,   SPRINTF },
+    { "sub"         ,   SUB },
+    { "while"       ,   WHILE },
     { 0, 0 }
 };
 
@@ -58,7 +58,6 @@ kw_init( void )
 {
     register const struct kw * p = keywords;
     register SYMTAB *          q;
-
     while ( p->text ) {
         q           = insert( p->text );
         q->type     = ST_KEYWORD;
@@ -71,7 +70,6 @@ const char *
 find_kw_str( int kw_token )
 {
     const struct kw * p;
-
     for ( p = keywords; p->text; p++ )
         if ( p->kw == kw_token )
             return p->text;

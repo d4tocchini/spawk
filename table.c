@@ -1,6 +1,6 @@
 
 /********************************************
-hash.c
+table.c
 copyright 1991,2014-2016 Michael D. Brennan
 
 This is a source file for mawk, an implementation of
@@ -13,11 +13,25 @@ If you import elements of this code into another product,
 you agree to not name that product mawk.
 ********************************************/
 
-/* hash.c */
+/* table.c */
 
 #include "mawk.h"
 #include "memory.h"
-#include "symtype.h"
+#include "table.h"
+
+typedef struct hash {
+    struct hash * link;
+    SYMTAB        symtab;
+} HASHNODE;
+
+#if defined( __cplusplus )
+#define delete delete_
+#endif
+
+static HASHNODE * delete ( const char * );
+
+static HASHNODE * hash_table[HASH_PRIME];
+
 
 /*
  * FNV-1a hash function
@@ -50,18 +64,6 @@ hash2( const char * s, size_t len )
     return h;
 }
 
-typedef struct hash {
-    struct hash * link;
-    SYMTAB        symtab;
-} HASHNODE;
-
-#if defined( __cplusplus )
-#define delete delete_
-#endif
-
-static HASHNODE * delete ( const char * );
-
-static HASHNODE * hash_table[HASH_PRIME];
 
 /*
 insert a string in the symbol table.

@@ -2,7 +2,7 @@
 
 /* scancode.c */
 /* generated from scancode.src.c */
-/* Thu Apr  4 17:07:20 PDT 2019 */
+/* Thu Apr  4 17:39:51 PDT 2019 */
 
 
 int scan_code[256] = {

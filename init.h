@@ -20,7 +20,7 @@ you agree to not name that product mawk.
 #ifndef  INIT_H
 #define  INIT_H
 
-#include "symtype.h"
+#include "table.h"
 
 /* nodes to link file names for multiple
    -f option */

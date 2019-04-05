@@ -1,6 +1,6 @@
 
 /********************************************
-symtype.h
+table.h
 copyright 1991,2014-2016 Michael D. Brennan
 
 This is a source file for mawk, an implementation of
