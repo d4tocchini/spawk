@@ -37,7 +37,7 @@ fin.c
 hash.c
 init.c
 int.c
-jmp.c
+code_jmp.c
 kw.c
 main.c
 makescan.c
@@ -60,7 +60,6 @@ files.h
 fin.h
 init.h
 int.h
-jmp.h
 mawk.h
 memory.h
 parse.h

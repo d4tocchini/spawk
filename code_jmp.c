@@ -1,6 +1,6 @@
 
 /********************************************
-jmp.c
+code_jmp.c
 copyright 1991,2014-2016 Michael D. Brennan
 
 This is a source file for mawk, an implementation of
@@ -22,7 +22,6 @@ you agree to not name that product mawk.
 
 #include "mawk.h"
 #include "symtype.h"
-#include "jmp.h"
 #include "code.h"
 #include "sizes.h"
 #include "init.h"
@@ -163,7 +162,7 @@ typedef struct mc { /* mc -- move code */
 } MC;
 
 static MC * mc_top;
-int         code_move_level = 0; /* see comment in jmp.h */
+int         code_move_level = 0; /* see comment in code.h */
 
 #define NO_SCOPE -1
 /* means relocation of resolve list not needed */

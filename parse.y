@@ -24,7 +24,6 @@ not name that product mawk.
 #include "memory.h"
 #include "bi_funct.h"
 #include "bi_vars.h"
-#include "jmp.h"
 #include "field.h"
 #include "files.h"
 #include "scan.h"
@@ -1148,7 +1147,7 @@ outside_error       :   error                                   {   // we may ha
                                                                 }
 	                ;
 /* a call to a user defined function */
-p_expr              :   FUNCT_ID mark  call_args                {   $$ = $2 ;
+p_expr              :   FUNCT_ID  mark  call_args               {   $$ = $2 ;
                                                                     code2(_CALL, $1) ;
                                                                     if ( $3 )
                                                                         code1($3->arg_num+1) ;

@@ -16,7 +16,6 @@ you agree to not name that product mawk.
 #include "mawk.h"
 #include "code.h"
 #include "init.h"
-#include "jmp.h"
 #include "field.h"
 
 // static CODEBLOCK * code_create_block( void );
