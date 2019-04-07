@@ -16,6 +16,15 @@ not name that product mawk.
 /* make parser reentrant */
 %define api.pure full
 
+// %param {mawk_state_t * state}
+// %param {environment_type *env}
+// If ‘%define api.pure full’ is added:
+    // int yylex   (YYSTYPE *lvalp, scanner_mode *mode, environment_type *env);
+    // int yyparse (parser_mode *mode, environment_type *env);
+// %parse-param {int *nastiness} {int *randomness}
+
+// %define api.push-pull push
+
 %{
 #include <stdio.h>
 #include "mawk.h"
@@ -39,7 +48,7 @@ static void     field_A2I(void) ;
 static void     check_var(SYMTAB *) ;
 static void     check_array(SYMTAB *) ;
 static void     RE_as_arg(void) ;
-       int      REempty(PTR) ;
+       int      REempty(void *) ;
 static int      scope ;
 static FBLOCK * active_funct ;
       /* when scope is SCOPE_FUNCT  */
@@ -56,7 +65,7 @@ static FBLOCK * active_funct ;
 */
 
 /* this nonsense caters to MSDOS large model */
-#define  CODE_FE_PUSHA()            code_ptr->ptr = (PTR) 0 ; \
+#define  CODE_FE_PUSHA()            code_ptr->ptr = (void *) 0 ; \
                                     code1(FE_PUSHA)
 
 
@@ -165,7 +174,7 @@ _code_close_active( int * scope ) // switch_code_to_main(void)
     ARG2_REC *      arg2p       ;
     CA_REC   *      ca_p        ;
     int             ival        ;
-    PTR             ptr         ;
+   void *            ptr         ;
 }
 
 /*  two tokens to help with errors */
@@ -539,7 +548,7 @@ builtin             :   SPRINTF  mark  LPAREN  RPAREN           {   $$ = $2 ;
 string_comma        :   STRING_  COMMA                          {   STRING* str = (STRING*) $1 ;
                                                                     const Form* form = parse_form(str) ;
                                                                     free_STRING(str) ;
-                                                                    $$ = (PTR) form ;
+                                                                    $$ = (void *) form ;
                                                                     code2(PUSHFM, form) ;
                                                                 }
 	                ;
@@ -901,7 +910,7 @@ split_back          :   RPAREN                                  {   code2(_PUSHI
                                                                                 cp->ptr = code_ptr[-1].ptr ;
                                                                                 cast_for_split(cp) ;
                                                                                 code_ptr[-2].op = _PUSHC ;
-                                                                                code_ptr[-1].ptr = (PTR) cp ;
+                                                                                code_ptr[-1].ptr = (void *) cp ;
                                                                             }
                                                                         }
                                                                     }
@@ -980,7 +989,7 @@ re_arg              :   expr                                    {   INST *p1 = C
                                                                                 cp->ptr = p1[1].ptr ;
                                                                                 cast_to_RE(cp) ;
                                                                                 p1->op = _PUSHC ;
-                                                                                p1[1].ptr = (PTR) cp ;
+                                                                                p1[1].ptr = (void *) cp ;
                                                                             }
                                                                     }
                                                                 }
@@ -1048,7 +1057,7 @@ p_expr              :   sub_or_gsub  LPAREN  re_arg  COMMA  expr  sub_back
                                                                         cp->ptr = p5[1].ptr ;
                                                                         cast_to_REPL(cp) ;
                                                                         p5->op = _PUSHC ;
-                                                                        p5[1].ptr = (PTR) cp ;
+                                                                        p5[1].ptr = (void *) cp ;
                                                                     }
                                                                     code2(_BUILTIN, $1) ;
                                                                     $$ = $3 ;
@@ -1229,7 +1238,7 @@ static void
 field_A2I(void) {
     CELL *cp ;
     if ( code_ptr[-1].op == FE_PUSHA &&
-        code_ptr[-1].ptr == (PTR) 0) {
+        code_ptr[-1].ptr == (void *) 0) {
         /*  On most architectures, the two tests are the same; a good
             compiler might eliminate one.  On LM_DOS, and possibly other
             segmented architectures, they are not */
@@ -1366,6 +1375,7 @@ RE_as_arg(void) {
 
 void
 parse(void) {
+    SCAN_CODE_DIRTY;
     if ( yyparse() || compile_error_count != 0 )
         mawk_exit(2) ;
     scan_cleanup() ;

@@ -699,7 +699,7 @@ for(p = sp; p <= top ; p++) free_STRING(string(p)) ;
 free_STRING(string(&subsep)) ;
 /* set contents of sp , sp->type > C_STRING is possible so reset */
 sp->type = C_STRING ;
-sp->ptr = (PTR) sval ;
+sp->ptr = (void *) sval ;
 return sp ;
 
 @

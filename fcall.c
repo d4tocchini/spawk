@@ -58,12 +58,12 @@ call_arg_check(
             if ( q->sym_p->type == ST_VAR ) {
                 /* set type and patch */
                 q->type                       = CA_EXPR;
-                start[q->call_offset + 1].ptr = (PTR)q->sym_p->stval.cp;
+                start[q->call_offset + 1].ptr = (void *)q->sym_p->stval.cp;
             }
             else if ( q->sym_p->type == ST_ARRAY ) {
                 q->type                       = CA_ARRAY;
                 start[q->call_offset].op      = A_PUSHA;
-                start[q->call_offset + 1].ptr = (PTR)q->sym_p->stval.array;
+                start[q->call_offset + 1].ptr = (void *)q->sym_p->stval.array;
             }
             else /* try to infer from callee */
             {
@@ -73,7 +73,7 @@ call_arg_check(
                         q->sym_p->type                = ST_VAR;
                         q->sym_p->stval.cp            = ZMALLOC( CELL );
                         q->sym_p->stval.cp->type      = C_NOINIT;
-                        start[q->call_offset + 1].ptr = (PTR)q->sym_p->stval.cp;
+                        start[q->call_offset + 1].ptr = (void *)q->sym_p->stval.cp;
                         break;
 
                     case ST_LOCAL_ARRAY:
@@ -81,7 +81,7 @@ call_arg_check(
                         q->sym_p->type                = ST_ARRAY;
                         q->sym_p->stval.array         = new_ARRAY();
                         start[q->call_offset].op      = A_PUSHA;
-                        start[q->call_offset + 1].ptr = (PTR)q->sym_p->stval.array;
+                        start[q->call_offset + 1].ptr = (void *)q->sym_p->stval.array;
                         break;
                 }
             }

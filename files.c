@@ -32,7 +32,7 @@ typedef struct file {
     struct file * link;
     STRING *      name;
     int           type;
-    PTR           ptr; /* FIN*   or  FILE*   */
+   void *          ptr; /* FIN*   or  FILE*   */
 } FILE_NODE;
 
 static FILE_NODE * file_list;
@@ -48,7 +48,7 @@ static FILE_NODE * std_out;
    return is 0 on failure to open input
    error exit 2 on failure to open output
 */
-PTR
+void *
 file_find( STRING * sval, int type )
 {
     FILE_NODE *  p    = file_list;
@@ -68,7 +68,7 @@ file_find( STRING * sval, int type )
 #else
                     ostr = "w";
 #endif
-                    if ( !( p->ptr = (PTR)tfopen( name, ostr ) ) )
+                    if ( !( p->ptr = (void *)tfopen( name, ostr ) ) )
                         goto out_failure;
                     break;
 
@@ -78,14 +78,14 @@ file_find( STRING * sval, int type )
 #else
                     ostr = "a";
 #endif
-                    if ( !( p->ptr = (PTR)tfopen( name, ostr ) ) )
+                    if ( !( p->ptr = (void *)tfopen( name, ostr ) ) )
                         goto out_failure;
                     break;
 
                 case F_IN:
-                    if ( !( p->ptr = (PTR)FINopen( name, 0 ) ) ) {
+                    if ( !( p->ptr = (void *)FINopen( name, 0 ) ) ) {
                         zfree( p, sizeof( FILE_NODE ) );
-                        return (PTR)0;
+                        return (void *)0;
                     }
                     break;
 
@@ -101,7 +101,7 @@ file_find( STRING * sval, int type )
                     FIN * fin = FINpopen( name );
                     if ( !fin ) {
                         zfree( p, sizeof( FILE_NODE ) );
-                        return (PTR)0;
+                        return (void *)0;
                     }
                     p->ptr = fin;
                 } break;
@@ -348,12 +348,12 @@ set_stdoutput( void )
     p->link     = (FILE_NODE *)0;
     p->type     = F_TRUNC;
     p->name     = new_STRING( "/dev/stdout" );
-    p->ptr      = (PTR)stdout;
+    p->ptr      = (void *)stdout;
     std_err = q = ZMALLOC( FILE_NODE );
     q->link     = p;
     q->type     = F_TRUNC;
     q->name     = new_STRING( "/dev/stderr" );
-    q->ptr      = (PTR)stderr;
+    q->ptr      = (void *)stderr;
     file_list   = q;
 }
 

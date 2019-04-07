@@ -23,7 +23,7 @@ you agree to not name that product mawk.
 //                          CELL
 typedef struct cell         {
     int     type;
-    PTR     ptr;
+   void *    ptr;
     double  dval;
                             }
 CELL;
@@ -34,7 +34,7 @@ typedef                     CELL * ( *PF_CP )( CELL * )
 //                          INST
 typedef union               {   // an element of code (instruction)
     int     op;
-    PTR     ptr;
+   void *    ptr;
                             }
 INST;
 //                          CELLtypes

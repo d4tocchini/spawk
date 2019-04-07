@@ -378,7 +378,7 @@ set_main_to_stdin( void )
 {
     cell_destroy( FILENAME );
     FILENAME->type = C_STRING;
-    FILENAME->ptr  = (PTR)new_STRING( "-" );
+    FILENAME->ptr  = (void *)new_STRING( "-" );
     cell_destroy( FNR );
     FNR->type = C_DOUBLE;
     FNR->dval = 0.0;
@@ -507,11 +507,11 @@ is_cmdline_assign( char * s )
     CELL     cell;           /* used if command line assign to pseudo field */
     CELL *   fp = (CELL *)0; /* ditto */
 
-    if ( scan_code[*(unsigned char *)s] != SC_IDCHAR )
+    if ( scan_code_get(*(unsigned char *)s) != SC_IDCHAR )
         return 0;
 
     p = s + 1;
-    while ( ( c = scan_code[*(unsigned char *)p] ) == SC_IDCHAR
+    while ( ( c = scan_code_get(*(unsigned char *)p) ) == SC_IDCHAR
             || c == SC_DIGIT )
         p++;
 

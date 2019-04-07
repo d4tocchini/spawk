@@ -225,7 +225,7 @@ bi_sprintf1( CELL * sp )
     }
     sval= do_xprintf( 0, form, sp + 1 );
     free_STRING( string( sp ) );
-    sp->ptr= (PTR)sval; /* sp->type == C_STRING */
+    sp->ptr= (void *)sval; /* sp->type == C_STRING */
 
     /* cleanup */
     {
@@ -248,7 +248,7 @@ bi_sprintf( CELL * sp )
 
     sval    = do_xprintf( 0, (const Form *)sp->ptr, sp + 1 );
     sp->type= C_STRING;
-    sp->ptr = (PTR)sval;
+    sp->ptr = (void *)sval;
 
     /* cleanup */
     {

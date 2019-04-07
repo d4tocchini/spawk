@@ -22,7 +22,7 @@ you agree to not name that product mawk.
 extern void   set_field0( const char *, size_t );
 extern void   split_field0( void );
 extern void   field_assign( CELL *, CELL * );
-extern char * is_string_split( PTR, size_t * );
+extern char * is_string_split( void *, size_t * );
 extern void   slow_cell_assign( CELL *, CELL * );
 extern CELL * slow_field_ptr( int );
 extern int    field_addr_to_index( CELL * );
@@ -75,7 +75,7 @@ extern int nf; /* shadows NF */
 typedef struct {
     char type;
     char c;
-    PTR  ptr; /* STRING* or RE machine* */
+   void * ptr; /* STRING* or RE machine* */
 } SEPARATOR;
 
 extern SEPARATOR rs_shadow;

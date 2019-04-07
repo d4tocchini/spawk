@@ -15,28 +15,30 @@ you agree to not name that product mawk.
 /* repl.h */
 /* replacement */
 
-#ifndef  REPL_H
-#define  REPL_H
+#ifndef REPL_H
+#define REPL_H
 
 #include "types.h"
 
-PTR re_compile(const STRING *);
-const STRING* re_uncompile(PTR);
+void *            re_compile( const STRING * );
+const STRING * re_uncompile( void * );
 
 typedef struct {
-    unsigned cnt;		/* number of pieces */
-    unsigned amp_cnt;		/* number of & */
-    STRING **pieces;
-    size_t piece_len;
+    unsigned  cnt;     /* number of pieces */
+    unsigned  amp_cnt; /* number of & */
+    STRING ** pieces;
+    size_t    piece_len;
 } Replv_Data;
 
-void replacement_scan(const STRING *, CELL *);
-const STRING *repl_unscan(CELL *);
+void           replacement_scan( const STRING *, CELL * );
+const STRING * repl_unscan( CELL * );
 
 /* only C_REPL needs anything freed */
-#define repl_destroy(cp) do{ \
-     if((cp)->type == C_REPL) { \
-         free_STRING(string(cp)) ; \
-     }} while(0)
+#define repl_destroy( cp )               \
+    do {                                 \
+        if ( ( cp )->type == C_REPL ) {  \
+            free_STRING( string( cp ) ); \
+        }                                \
+    } while ( 0 )
 
 #endif

@@ -98,7 +98,7 @@ stackp->m=(mx);stackp->s=(sx);stackp->u=(ux)
 */
 
 int
-REtest(const char* str, size_t len, PTR machine)
+REtest(const char* str, size_t len, void * machine)
 {
    register STATE *m = (STATE *) machine ;
    register const char *s = str ;
@@ -305,7 +305,7 @@ reswitch  :
 #ifdef	MAWK
 
 char *
-is_string_split(PTR q, size_t* lenp)
+is_string_split(void * q, size_t* lenp)
 {
    STATE *p;
 

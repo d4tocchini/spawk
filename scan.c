@@ -131,11 +131,16 @@ scan_cleanup( void )
         close( program_fd );
 
     /* redefine SPACE as [ \t\n] */
+    if (posix_space_flag && rs_shadow.type != SEP_MLR)
+        SCAN_CODE_SET_NL(SC_UNEXPECTED);
+    else
+        SCAN_CODE_SET_NL(SC_SPACE);
 
-    scan_code['\n']   = posix_space_flag && rs_shadow.type != SEP_MLR ? SC_UNEXPECTED : SC_SPACE;
-    scan_code['\f']   = SC_UNEXPECTED; /*value doesn't matter */
-    scan_code['\013'] = SC_UNEXPECTED; /* \v not space */
-    scan_code['\r']   = SC_UNEXPECTED;
+    // TODO: ???????? NOT NEEDED b/c after parse() below has no impact??????????
+    SCAN_CODE_CLEAN;
+    // scan_code['\f']   = SC_UNEXPECTED; /*value doesn't matter */
+    // scan_code['\013'] = SC_UNEXPECTED; /* \v not space */
+    // scan_code['\r']   = SC_UNEXPECTED;
 }
 
 /*--------------------------------
@@ -210,7 +215,7 @@ eat_comment( void )
 {
     register int c;
 
-    while ( ( c = next() ) != '\n' && scan_code[c] )
+    while ( ( c = next() ) != '\n' && scan_code_get(c) )
         ;
     un_next();
 }
@@ -228,7 +233,7 @@ eat_semi_colon( void )
 {
     register int c;
 
-    while ( scan_code[c = next()] == SC_SPACE )
+    while ( scan_code_get(c = next()) == SC_SPACE )
         ;
     if ( c != ';' )
         un_next();
@@ -238,7 +243,7 @@ void
 eat_nl( YYSTYPE * yylval ) /* eat all space including newlines */
 {
     while ( 1 )
-        switch ( scan_code[next()] ) {
+        switch ( scan_code_get(next()) ) {
             case SC_COMMENT:
                 eat_comment();
                 break;
@@ -257,7 +262,7 @@ eat_nl( YYSTYPE * yylval ) /* eat all space including newlines */
                 {
                     unsigned c;
 
-                    while ( scan_code[c = next()] == SC_SPACE )
+                    while ( scan_code_get(c = next()) == SC_SPACE )
                         ;
                     if ( c == '\n' )
                         token_lineno = ++lineno;
@@ -295,7 +300,7 @@ yylex( YYSTYPE * yylval )
 
 reswitch:
 
-    switch ( scan_code[c = next()] ) {
+    switch ( scan_code_get(c = next()) ) {
         case 0:
             ct_ret( EOF );
 
@@ -312,7 +317,7 @@ reswitch:
             ct_ret( NL );
 
         case SC_ESCAPE:
-            while ( scan_code[c = next()] == SC_SPACE )
+            while ( scan_code_get(c = next()) == SC_SPACE )
                 ;
             if ( c == '\n' ) {
                 token_lineno = ++lineno;
@@ -553,13 +558,13 @@ reswitch:
                 if ( flag )
                     ct_ret( flag );
                 else
-                    yylval->ptr = (PTR)&double_zero;
+                    yylval->ptr = (void *)&double_zero;
             }
             else if ( d == 1.0 ) {
-                yylval->ptr = (PTR)&double_one;
+                yylval->ptr = (void *)&double_one;
             }
             else {
-                yylval->ptr            = (PTR)ZMALLOC( double );
+                yylval->ptr            = (void *)ZMALLOC( double );
                 *(double *)yylval->ptr = d;
             }
             ct_ret( DOUBLE );
@@ -570,9 +575,9 @@ reswitch:
             double d;
             int    flag;
 
-            while ( scan_code[c = next()] == SC_SPACE )
+            while ( scan_code_get(c = next()) == SC_SPACE )
                 ;
-            if ( scan_code[c] != SC_DIGIT && scan_code[c] != SC_DOT ) {
+            if ( scan_code_get(c) != SC_DIGIT && scan_code_get(c) != SC_DOT ) {
                 un_next();
                 ct_ret( DOLLAR );
             }
@@ -611,7 +616,7 @@ reswitch:
             string_buff[0] = c;
 
             while (
-                ( c = scan_code[ * p++ = next()] ) == SC_IDCHAR || c == SC_DIGIT )
+                ( c = scan_code_get(* p++ = next()) ) == SC_IDCHAR || c == SC_DIGIT )
                 ;
 
             un_next();
@@ -707,14 +712,14 @@ collect_decimal( YYSTYPE * yylval, int c, int * flag )
     string_buff[0] = c;
 
     if ( c == '.' ) {
-        if ( scan_code[ * p++ = next()] != SC_DIGIT ) {
+        if ( scan_code_get(* p++ = next()) != SC_DIGIT ) {
             *flag        = UNEXPECTED;
             yylval->ival = '.';
             return 0.0;
         }
     }
     else {
-        while ( scan_code[ * p++ = next()] == SC_DIGIT )
+        while ( scan_code_get( * p++ = next()) == SC_DIGIT )
             ;
         if ( p[-1] != '.' ) {
             un_next();
@@ -722,7 +727,7 @@ collect_decimal( YYSTYPE * yylval, int c, int * flag )
         }
     }
     /* get rest of digits after decimal point */
-    while ( scan_code[ * p++ = next()] == SC_DIGIT )
+    while ( scan_code_get( * p++ = next()) == SC_DIGIT )
         ;
 
     /* check for exponent */
@@ -732,7 +737,7 @@ collect_decimal( YYSTYPE * yylval, int c, int * flag )
     }
     else /* get the exponent */
     {
-        if ( scan_code[ * p = next()] != SC_DIGIT && *p != '-' && *p != '+' ) {
+        if ( scan_code_get( * p = next()) != SC_DIGIT && *p != '-' && *p != '+' ) {
             *++p  = 0;
             *flag = BAD_DECIMAL;
             return 0.0;
@@ -740,7 +745,7 @@ collect_decimal( YYSTYPE * yylval, int c, int * flag )
         else /* get the rest of the exponent */
         {
             p++;
-            while ( scan_code[ * p++ = next()] == SC_DIGIT )
+            while ( scan_code_get( * p++ = next()) == SC_DIGIT )
                 ;
             un_next();
             *--p = 0;
@@ -780,7 +785,7 @@ static char hex_val['f' - 'A' + 1] = {
 
 #define hex_value( x ) hex_val[( x ) - 'A']
 
-#define ishex( x ) ( scan_code[x] == SC_DIGIT || ( 'A' <= ( x ) && ( x ) <= 'f' && hex_value( x ) ) )
+#define ishex( x ) ( scan_code_get(x) == SC_DIGIT || ( 'A' <= ( x ) && ( x ) <= 'f' && hex_value( x ) ) )
 
 /* process one , two or three octal digits
    moving a pointer forward by reference */
@@ -810,12 +815,12 @@ hex( char ** start_p )
     register unsigned        x;
     unsigned                 t;
 
-    if ( scan_code[*p] == SC_DIGIT )
+    if ( scan_code_get(*p) == SC_DIGIT )
         x = *p++ - '0';
     else
         x = hex_value( *p++ );
 
-    if ( scan_code[*p] == SC_DIGIT )
+    if ( scan_code_get(*p) == SC_DIGIT )
         x = ( x << 4 ) + *p++ - '0';
     else if ( 'A' <= *p && *p <= 'f' && ( t = hex_value( *p ) ) ) {
         x = ( x << 4 ) + t;
@@ -903,7 +908,7 @@ collect_string( YYSTYPE * yylval )
     int                      e_flag = 0; /* on if have an escape char */
 
     while ( 1 ) {
-        switch ( scan_code[ * p++ = next()] ) {
+        switch ( scan_code_get( * p++ = next()) ) {
             case SC_DQUOTE: /* done */
                 *--p = 0;
                 goto out;

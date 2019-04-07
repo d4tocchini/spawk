@@ -288,7 +288,7 @@ da( INST * start, FILE * fp )
                         break;
                     case ST_ARRAY:
                         fprintf( fp, "a_pusha/pi_load\t%s\n", stp->name );
-                        p[1].ptr = (PTR)bi_alength;
+                        p[1].ptr = (void *)bi_alength;
                         break;
                     default:
                         fprintf( fp, "pushi/pi_load\t%s\n", "@unused" );
@@ -309,7 +309,7 @@ da( INST * start, FILE * fp )
                     case ST_LOCAL_ARRAY:
                         fprintf( fp, "la_pusha/lpi_load\t%s %u\n",
                                  fbp->name, offset );
-                        p[1].ptr = (PTR)bi_alength;
+                        p[1].ptr = (void *)bi_alength;
                         break;
                     case ST_LOCAL_NONE:
                         fprintf( fp, "pushi/lpi_load\t%s\n", "@unused" );

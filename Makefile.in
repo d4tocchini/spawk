@@ -105,7 +105,7 @@ EXCLUDEFLAGS	= --exclude=$$$$b/Makefile	\
 all : mawk
 
 
-check:	check_begin mawk_test check_end
+check:	check_begin mawk_test fpe_test check_end
 
 check_begin:
 	-@rm -f $(STATUS)
@@ -130,13 +130,13 @@ check_end:
 
 mawk_test :  mawk  # test that we have a sane mawk
 	@echo ; echo testing mawk
-	-cd test ; ./mawktest > mawktest.out 2> mawktest.err
+	-cd test ; time ./mawktest > mawktest.out 2> mawktest.err
 	@( cmp -s test/okay/mawktest.err test/mawktest.err && echo PASS: mawktest.err || echo FAIL: mawktest.err ) >> $(STATUS)
 	@( cmp -s test/okay/mawktest.out test/mawktest.out && echo PASS: mawktest.out || echo FAIL: mawktest.out ) >> $(STATUS)
 
 fpe_test :  mawk # test FPEs are handled OK
 	@echo ; echo testing floating point exception handling
-	-cd test ; ./fpe_test
+	-cd test ; time ./fpe_test
 
 parse.c parse.h : parse.y
 	@echo  expect 6 shift/reduce conflicts
@@ -222,7 +222,7 @@ $(OBJDIR)/print.o: print.c mawk.h types.h bi_vars.h bi_funct.h table.h array.h t
 $(OBJDIR)/printf.o: printf.c mawk.h types.h scan.h table.h array.h parse.h printf.h types_string.h zmalloc.h files.h types_int.h
 $(OBJDIR)/re_cmpl.o: re_cmpl.c mawk.h types.h types_string.h zmalloc.h scan.h table.h array.h parse.h regexp.h repl.h split.h
 $(OBJDIR)/scan.o: scan.c mawk.h types.h scan.h table.h array.h parse.h types_string.h zmalloc.h field.h init.h types_int.h fin.h repl.h code.h files.h
-$(OBJDIR)/scancode.o: scancode.c
+$(OBJDIR)/scancode.o: scancode.c scan.h
 $(OBJDIR)/split.o: split.c mawk.h types.h split.h table.h array.h bi_vars.h bi_funct.h types_string.h zmalloc.h scan.h parse.h regexp.h repl.h field.h
 $(OBJDIR)/version.o: version.c mawk.h types.h
 $(OBJDIR)/zmalloc.o: zmalloc.c mawk.h types.h zmalloc.h

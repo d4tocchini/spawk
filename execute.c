@@ -189,7 +189,7 @@ _mawk_execute(
                         if ( t > nf ) {
                             cell_destroy( cp );
                             cp->type = C_STRING;
-                            cp->ptr  = (PTR)&null_str;
+                            cp->ptr  = (void *)&null_str;
                             null_str.ref_cnt++;
                         }
                     }
@@ -218,7 +218,7 @@ _mawk_execute(
             case L_PUSHA:
                 /* put a local address on eval stack */
                 inc_sp();
-                sp->ptr = ( PTR )( fp + cdp++->op );
+                sp->ptr = (void *)( fp + cdp++->op );
                 break;
 
             case F_PUSHI:
@@ -238,7 +238,7 @@ _mawk_execute(
                 else /* an unset field */
                 {
                     sp->type = C_STRING;
-                    sp->ptr  = (PTR)&null_str;
+                    sp->ptr  = (void *)&null_str;
                     null_str.ref_cnt++;
                 }
                 break;
@@ -259,13 +259,13 @@ _mawk_execute(
                 t = d_to_index( sp->dval );
                 if ( t && nf < 0 )
                     split_field0();
-                sp->ptr = (PTR)field_ptr( t );
+                sp->ptr = (void *)field_ptr( t );
                 if ( t > nf ) {
                     /* make sure its set to "" */
                     cp = (CELL *)sp->ptr;
                     cell_destroy( cp );
                     cp->type = C_STRING;
-                    cp->ptr  = (PTR)&null_str;
+                    cp->ptr  = (void *)&null_str;
                     null_str.ref_cnt++;
                 }
                 break;
@@ -283,7 +283,7 @@ _mawk_execute(
                     cellcpy( sp, field_ptr( t ) );
                 else {
                     sp->type = C_STRING;
-                    sp->ptr  = (PTR)&null_str;
+                    sp->ptr  = (void *)&null_str;
                     null_str.ref_cnt++;
                 }
                 break;
@@ -295,7 +295,7 @@ _mawk_execute(
 
                 cp = array_find( (ARRAY)cdp++->ptr, sp, CREATE );
                 cell_destroy( sp );
-                sp->ptr = (PTR)cp;
+                sp->ptr = (void *)cp;
                 break;
 
             case AE_PUSHI:
@@ -327,7 +327,7 @@ _mawk_execute(
 	*/
                 cp = array_find( (ARRAY)fp[cdp++->op].ptr, sp, CREATE );
                 cell_destroy( sp );
-                sp->ptr = (PTR)cp;
+                sp->ptr = (void *)cp;
                 break;
 
             case LA_PUSHA:
@@ -353,7 +353,7 @@ _mawk_execute(
                             cdp[0].op  = A_PUSHA;
                             cdp[1].ptr = stp->stval.array;
                             /* cdp[2].op is _BUILTIN */
-                            cdp[3].ptr = (PTR)bi_alength;
+                            cdp[3].ptr = (void *)bi_alength;
                             break;
                         default: /* ST_NONE is possible but weird */
                             cdp[0].op  = _PUSHI;
@@ -383,7 +383,7 @@ _mawk_execute(
                             cdp[0].op = LA_PUSHA;
                             cdp[1].op = offset;
                             /* cdp[2].op is _BUILTIN */
-                            cdp[3].ptr = (PTR)bi_alength;
+                            cdp[3].ptr = (void *)bi_alength;
                             break;
                         default: /* ST_LOCAL_NONE is possible but weird */
                             cdp[0].op  = _PUSHI;
@@ -818,7 +818,7 @@ _mawk_execute(
                 free_STRING( string( sp ) );
                 free_STRING( string( sp + 1 ) );
 
-                sp->ptr = (PTR)b;
+                sp->ptr = (void *)b;
                 break;
             }
 
@@ -1248,7 +1248,7 @@ _mawk_execute(
                         type_p++;
                         sp->type = C_NOINIT;
                         if ( *type_p == ST_LOCAL_ARRAY )
-                            sp->ptr = (PTR)new_ARRAY();
+                            sp->ptr = (void *)new_ARRAY();
                     }
 
                     _mawk_execute( fbp->code, sp, nfp );

@@ -75,11 +75,11 @@ extern CELL     eval_stack[] ;
 #define code_limit  active_code.limit
 #define code_offset (code_ptr - code_base)
 #define code1(x)    code_ptr++ -> op = (x)
-#define code2(x,p)  xcode2(x,(PTR)(p))
+#define code2(x,p)  xcode2(x,(void *)(p))
 
 #define INST_BYTES(x) (sizeof(INST)*(unsigned)(x))
 
-void   xcode2(int, PTR) ;
+void   xcode2(int, void *) ;
 void   code2op(int, int) ;
 INST * code_shrink(CODEBLOCK*, unsigned*) ;
 void   code_grow(void) ;

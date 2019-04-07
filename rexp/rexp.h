@@ -18,7 +18,7 @@ you agree to not name that product mawk.
 #define  REXP_H
 
 
-typedef void* PTR ;
+// typedef void* PTR;
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,19 +27,19 @@ typedef void* PTR ;
 #include  <setjmp.h>
 
 typedef int Bool ;
-PTR   REcompile(const char *,size_t)  ;
-int   REtest (const char *, size_t len, PTR)  ;
-char *REmatch(const char *, size_t, PTR, size_t*, Bool)  ;
-void  REmprint(PTR , FILE*) ;
-int   REempty(PTR) ;
+void *   REcompile(const char *,size_t)  ;
+int   REtest (const char *, size_t len, void *)  ;
+char *REmatch(const char *, size_t, void *, size_t*, Bool)  ;
+void  REmprint(void * , FILE*) ;
+int   REempty(void *) ;
 
 extern  int  REerrno ;
 extern  const char* const REerrlist[] ;
 
 
 
-PTR  RE_malloc(size_t) ;
-PTR  RE_realloc(void *,size_t) ;
+void *  RE_malloc(size_t) ;
+void *  RE_realloc(void *, size_t) ;
 
 
 /*  finite machine  state types  */

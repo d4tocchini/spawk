@@ -210,7 +210,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 158 "parse.y" /* yacc.c:1927  */
+#line 167 "parse.y" /* yacc.c:1927  */
 
     CELL     *      cp          ;
     SYMTAB   *      stp         ;
@@ -221,7 +221,7 @@ union YYSTYPE
     ARG2_REC *      arg2p       ;
     CA_REC   *      ca_p        ;
     int             ival        ;
-    PTR             ptr         ;
+   void *            ptr         ;
 
 #line 227 "y.tab.h" /* yacc.c:1927  */
 };

@@ -37,10 +37,10 @@ awk_strtod( const STRING * sval )
     const char * s   = sval->str;
     char *       stop;
     /* eat space ourselves because it makes it easy to eliminate "inf"/"nan" */
-    while ( scan_code[*(unsigned char *)s] == SC_SPACE )
+    while ( scan_code_get(*(unsigned char *)s) == SC_SPACE )
         s++;
 
-    switch ( scan_code[*(unsigned char *)s] ) {
+    switch ( scan_code_get(*(unsigned char *)s) ) {
         case SC_DIGIT:
         case SC_PLUS:
         case SC_MINUS:
@@ -178,7 +178,7 @@ cast1_to_s( CELL * cp )
 void
 cast_to_RE( CELL * cp )
 {
-    register PTR p;
+    register void *p;
 
     if ( cp->type < C_STRING )
         cast1_to_s( cp );
@@ -209,7 +209,7 @@ cast_for_split( CELL * cp )
         else if ( c != 0 && strchr( meta, c ) ) {
             xbuff[1] = c;
             free_STRING( string( cp ) );
-            cp->ptr = (PTR)new_STRING( xbuff );
+            cp->ptr = (void *)new_STRING( xbuff );
         }
     }
     else if ( len == 0 ) {
@@ -240,10 +240,10 @@ check_strnum( CELL * cp )
     cp->type = C_STRING; /* assume not C_STRNUM */
     s        = (unsigned char *)string( cp )->str;
     q        = s + string( cp )->len;
-    while ( scan_code[*s] == SC_SPACE )
+    while ( scan_code_get(*s) == SC_SPACE )
         s++;
 
-    switch ( scan_code[*s] ) {
+    switch ( scan_code_get(*s) ) {
         case SC_DIGIT:
         case SC_PLUS:
         case SC_MINUS:
@@ -259,7 +259,7 @@ check_strnum( CELL * cp )
             /* we have a number, but must be all of it .
 	       we allow space at back */
 
-            while ( q > test && scan_code[q[-1]] == SC_SPACE )
+            while ( q > test && scan_code_get(q[-1]) == SC_SPACE )
                 q--;
 
             if ( q != test )

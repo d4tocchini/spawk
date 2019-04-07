@@ -385,7 +385,7 @@ set_ARGV( int argc, char ** argv, int i )
     argi.dval                = 0.0;
     cp                       = array_find( st_p->stval.array, &argi, CREATE );
     cp->type                 = C_STRING;
-    cp->ptr                  = (PTR)new_STRING( argv[0] );
+    cp->ptr                  = (void *)new_STRING( argv[0] );
 
     /* ARGV[0] is set, do the rest
      The type of ARGV[1] ... should be C_MBSTRN
@@ -394,7 +394,7 @@ set_ARGV( int argc, char ** argv, int i )
     for ( argi.dval = 1.0; i < argc; i++, argi.dval += 1.0 ) {
         cp       = array_find( st_p->stval.array, &argi, CREATE );
         cp->type = C_MBSTRN;
-        cp->ptr  = (PTR)new_STRING( argv[i] );
+        cp->ptr  = (void *)new_STRING( argv[i] );
     }
     ARGC->type = C_DOUBLE;
     ARGC->dval = argi.dval;
@@ -417,13 +417,13 @@ load_environ( ARRAY ENV )
         if ( ( s = strchr( *p, '=' ) ) ) /* shouldn't fail */
         {
             int len = s - *p;
-            c.ptr   = (PTR)new_STRING0( len );
+            c.ptr   = (void *)new_STRING0( len );
             memcpy( string( &c )->str, *p, len );
             s++;
 
             cp       = array_find( ENV, &c, CREATE );
             cp->type = C_MBSTRN;
-            cp->ptr  = (PTR)new_STRING( s );
+            cp->ptr  = (void *)new_STRING( s );
 
             free_STRING( string( &c ) );
         }

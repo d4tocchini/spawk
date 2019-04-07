@@ -84,8 +84,10 @@ scan_print( const char * date )
     printf( "\n\n/* scancode.c */\n" );
     printf( "/* generated from scancode.src.c */\n" );
     printf( "/* %s */\n\n\n", date );
-    printf( "int scan_code[256] = {\n" );
 
+    printf( "#include \"scan.h\" \n" );
+
+    printf( "const int scan_code[256] = {\n" );
     for ( r = 1; r <= 16; r++ ) {
         for ( c = 1; c <= 16; c++ ) {
             printf( "%2d", *p++ );
@@ -94,8 +96,40 @@ scan_print( const char * date )
         }
         putchar( '\n' );
     }
+    printf( "};\n" );
 
-    printf( "} ;\n" );
+    // printf( "    int     scan_code_cleaned = 0;  \n");
+    printf( "    int        scan_code_NL_value = SC_NL;  \n");
+
+    // printf( "   #define SCAN_CODE_CLEAN        scan_code_cleaned = 1  \n");
+    // printf( "   #define SCAN_CODE_DIRTY        scan_code_cleaned = 0  \n");
+    // printf( "   #define SCAN_CODE_SET_NL(code) scan_code_NL_value = code  \n");
+
+    // printf( "   int _scan_code_get_clean_space(const unsigned char c) {  \n");
+    // printf( "       switch (c) {                                         \n");
+    // printf( "           case '\\f'   :                                    \n");
+    // printf( "           case '\\013' :                                    \n");
+    // printf( "           case '\\r'   :                                    \n");
+    // printf( "               return SC_UNEXPECTED;                        \n");
+    // printf( "       }                                                    \n");
+    // printf( "       return 1;                                            \n");
+    // printf( "   }                                                        \n");
+
+    printf( "    int scan_code_get(const unsigned char c) {               \n");
+    // printf( "       if (c == '\\n') return scan_code_NL_value;            \n");
+    printf( "       const  int code = scan_code[c];                       \n");
+    //const  int i = code * scan_code_cleaned;
+     //printf(\"\\n %u %u %u \\n\", code, scan_code_cleaned, i);
+    printf( "       const  int i = code ^ SC_NL;                          \n");
+    printf( "       switch (i) {                  \n");
+    printf( "           case 0 :                                         \n");
+    printf( "               return scan_code_NL_value;            \n");
+    // printf( "               return _scan_code_get_clean_space(c);        \n");
+    // printf( "           case SC_SPACE : // SC_SPACE = 1                  \n");
+    // printf( "               return code;                                 \n");
+    printf( "       }                                                    \n");
+    printf( "       return code;                                         \n");
+    printf( "   }                                                        \n");
 }
 
 char dbuff[128];

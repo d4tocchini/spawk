@@ -438,7 +438,7 @@ RE_01(MACHINE* mp)
    a regular expression of "".
 */
 
-int REempty(PTR p)
+int REempty(void * p)
 {
     STATE* s = (STATE*) p ;
     return s->type == M_ACCEPT ;
@@ -449,18 +449,18 @@ MEMORY	ALLOCATION
  *==============================*/
 
 
-PTR
+void *
 RE_malloc(size_t sz)
 {
-   PTR ret = malloc(sz) ;
+  void * ret = malloc(sz) ;
    if (!ret) RE_error_trap(MEMORY_FAILURE) ;
    return ret ;
 }
 
-PTR
+void *
 RE_realloc(void* p, size_t sz)
 {
-    PTR ret = realloc(p,sz) ;
+   void * ret = realloc(p,sz) ;
     if (!ret) RE_error_trap(MEMORY_FAILURE) ;
     return ret ;
 }

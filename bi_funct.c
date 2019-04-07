@@ -496,12 +496,12 @@ bi_substr( CELL * sp )
 
     if ( n <= 0 ) /* the null string */
     {
-        sp->ptr = (PTR)&null_str;
+        sp->ptr = (void *)&null_str;
         null_str.ref_cnt++;
     }
     else /* got something */
     {
-        sp->ptr = (PTR)new_STRING0( n );
+        sp->ptr = (void *)new_STRING0( n );
         memcpy( string( sp )->str, sval->str + i, n );
     }
 
@@ -558,7 +558,7 @@ bi_toupper( CELL * sp )
     if ( sp->type != C_STRING )
         cast1_to_s( sp );
     old     = string( sp );
-    sp->ptr = (PTR)new_STRING0( old->len );
+    sp->ptr = (void *)new_STRING0( old->len );
 
     q = string( sp )->str;
     p = old->str;
@@ -581,7 +581,7 @@ bi_tolower( CELL * sp )
     if ( sp->type != C_STRING )
         cast1_to_s( sp );
     old     = string( sp );
-    sp->ptr = (PTR)new_STRING0( old->len );
+    sp->ptr = (void *)new_STRING0( old->len );
 
     q = string( sp )->str;
     p = old->str;
@@ -1058,7 +1058,7 @@ bi_getline( CELL * sp )
     }
     else {
         tc.type = C_MBSTRN;
-        tc.ptr  = (PTR)new_STRING2( p, len );
+        tc.ptr  = (void *)new_STRING2( p, len );
     }
 
     slow_cell_assign( cp, &tc );
@@ -1160,7 +1160,7 @@ bi_sub( CELL * sp )
         }
 
         tc.type = C_STRING;
-        tc.ptr  = (PTR)new_STRING0( result_len );
+        tc.ptr  = (void *)new_STRING0( result_len );
 
         {
             char * p = string( &tc )->str;
@@ -1247,7 +1247,7 @@ destroy_gs_list( Gsub_Block * p )
 */
 
 static STRING *
-gsub( const PTR      re,
+gsub( const void *     re,
       const STRING * replacement,
       const STRING * input_s,
       unsigned *     cnt_p )
@@ -1401,7 +1401,7 @@ gsub( const PTR      re,
 */
 
 static STRING *
-gsubv( const PTR          re,
+gsubv( const void *         re,
        const Replv_Data * replacev,
        const STRING *     input_s,
        unsigned *         cnt_p )
@@ -1571,7 +1571,7 @@ bi_gsub( CELL * sp )
         tc.ptr = gsub( sp->ptr, string( sp + 1 ), string( &sc ), &repl_cnt );
     }
     else {
-        tc.ptr = (PTR)gsubv( sp->ptr, (Replv_Data *)( sp + 1 )->ptr,
+        tc.ptr = (void *)gsubv( sp->ptr, (Replv_Data *)( sp + 1 )->ptr,
                              string( &sc ), &repl_cnt );
     }
 
@@ -1976,7 +1976,7 @@ bi_END( CELL ** sp, int status )
 {
     if ( ret_c == 1 ) {
         ( *sp )->type = C_STRING;
-        ( *sp )->ptr  = (PTR)new_STRING2( ret_v[0], strlen( ret_v[0] ) );
+        ( *sp )->ptr  = (void *)new_STRING2( ret_v[0], strlen( ret_v[0] ) );
     }
     else {
         ( *sp )->type = C_DOUBLE;

@@ -108,7 +108,7 @@ set_rs_shadow( void )
     size_t       len;
 
     if ( posix_space_flag && mawk_state == EXECUTION )
-        scan_code['\n'] = SC_UNEXPECTED;
+        SCAN_CODE_SET_NL( SC_UNEXPECTED );
 
     if ( rs_shadow.type == SEP_STR ) {
         free_STRING( (STRING *)rs_shadow.ptr );
@@ -124,7 +124,7 @@ set_rs_shadow( void )
                 }
                 else {
                     rs_shadow.type = SEP_STR;
-                    rs_shadow.ptr  = (PTR)new_STRING2( s, len );
+                    rs_shadow.ptr  = (void *)new_STRING2( s, len );
                 }
             }
             else {
@@ -140,7 +140,7 @@ set_rs_shadow( void )
 
         case C_SNULL: /* RS becomes one or more blank lines */
             if ( mawk_state == EXECUTION )
-                scan_code['\n'] = SC_SPACE;
+                SCAN_CODE_SET_NL( SC_SPACE );
             rs_shadow.type = SEP_MLR;
             sval           = new_STRING( "\n\n+" );
             rs_shadow.ptr  = re_compile( sval );
@@ -180,7 +180,7 @@ field_init( void )
     allocate_fbankv( 0 );
 
     field[0].type = C_STRING;
-    field[0].ptr  = (PTR)&null_str;
+    field[0].ptr  = (void *)&null_str;
     null_str.ref_cnt++;
 
     load_pfield( "NF", NF );
@@ -189,17 +189,17 @@ field_init( void )
 
     load_pfield( "RS", RS );
     RS->type = C_STRING;
-    RS->ptr  = (PTR)new_STRING( "\n" );
+    RS->ptr  = (void *)new_STRING( "\n" );
     /* rs_shadow already set */
 
     load_pfield( "FS", FS );
     FS->type = C_STRING;
-    FS->ptr  = (PTR)new_STRING( " " );
+    FS->ptr  = (void *)new_STRING( " " );
     /* fs_shadow is already set */
 
     load_pfield( "OFMT", OFMT );
     OFMT->type = C_STRING;
-    OFMT->ptr  = (PTR)new_STRING( "%.6g" );
+    OFMT->ptr  = (void *)new_STRING( "%.6g" );
 
     load_pfield( "CONVFMT", CONVFMT );
     CONVFMT->type = C_STRING;
@@ -215,7 +215,7 @@ set_field0( const char * s, size_t len )
 
     if ( len ) {
         field[0].type = C_MBSTRN;
-        field[0].ptr  = (PTR)new_STRING2( s, len );
+        field[0].ptr  = (void *)new_STRING2( s, len );
     }
     else {
         field[0].type = C_STRING;
@@ -326,7 +326,7 @@ field_assign( CELL * fp, CELL * cp )
                     cp = field_ptr( i );
                     cell_destroy( cp );
                     cp->type = C_STRING;
-                    cp->ptr  = (PTR)&null_str;
+                    cp->ptr  = (void *)&null_str;
                     null_str.ref_cnt++;
                 }
 
@@ -391,7 +391,7 @@ field_assign( CELL * fp, CELL * cp )
                     cp = field_ptr( j );
                     cell_destroy( cp );
                     cp->type = C_STRING;
-                    cp->ptr  = (PTR)&null_str;
+                    cp->ptr  = (void *)&null_str;
                     null_str.ref_cnt++;
                 }
                 nf = i;
@@ -419,7 +419,7 @@ build_field0( void )
 
     if ( nf == 0 ) {
         field[0].type = C_STRING;
-        field[0].ptr  = (PTR)&null_str;
+        field[0].ptr  = (void *)&null_str;
         null_str.ref_cnt++;
     }
     else if ( nf == 1 ) {
@@ -449,7 +449,7 @@ build_field0( void )
         while ( cnt-- > 0 ) {
             if ( cp->type < C_STRING ) { /* use the string field temporarily */
                 if ( cp->type == C_NOINIT ) {
-                    cp->ptr = (PTR)&null_str;
+                    cp->ptr = (void *)&null_str;
                     null_str.ref_cnt++;
                 }
                 else { /* its a double */
@@ -471,7 +471,7 @@ build_field0( void )
         }
 
         field[0].type = C_STRING;
-        field[0].ptr  = (PTR)new_STRING0( len );
+        field[0].ptr  = (void *)new_STRING0( len );
 
         p = string( field )->str;
 
@@ -610,14 +610,14 @@ set_binmode( int x )
 
     /* set RS */
     c.type = C_STRING;
-    c.ptr  = (PTR)new_STRING( ( change && ( x & 1 ) ) ? "\r\n" : "\n" );
+    c.ptr  = (void *)new_STRING( ( change && ( x & 1 ) ) ? "\r\n" : "\n" );
     field_assign( RS, &c );
     free_STRING( string( &c ) );
 
     /* set ORS */
     cell_destroy( ORS );
     ORS->type = C_STRING;
-    ORS->ptr  = (PTR)new_STRING( ( change && ( x & 2 ) ) ? "\r\n" : "\n" );
+    ORS->ptr  = (void *)new_STRING( ( change && ( x & 2 ) ) ? "\r\n" : "\n" );
 
     cell_destroy( BINMODE );
     BINMODE->type = C_DOUBLE;

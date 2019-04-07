@@ -39,7 +39,7 @@ you agree to not name that product mawk.
 
 size_t space_split( const char * str, size_t slen );
 size_t null_split( const char * str, size_t len );
-size_t re_split( const char * str, size_t len, PTR re );
+size_t re_split( const char * str, size_t len, void * re );
 
 /* the two transfer functions  */
 void transfer_to_fields( size_t cnt );

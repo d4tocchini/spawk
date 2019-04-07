@@ -43,7 +43,7 @@ you agree to not name that product mawk.
 
 
 
-typedef void * PTR;
+// typedef void * PTR;
 typedef int    Bool;
 
 #include "scan.h"
@@ -60,20 +60,39 @@ extern int yydebug; /* print parse if on */
 extern int dump_RE;
 #endif
 
-
-
 /*----------------
  *  GLOBAL VARIABLES
  *----------------*/
+
+// #define COMP
+
+// DOD_SOA                                 mawk_d {
+//     DOD_CONS STRING const * const           the_empty_str;
+//     DOD_COMP STRING                         null_str ; // a well known string
+// /*  `string_buff` a useful scratch area
+//     Once execute() starts the sprintf code is (belatedly) the only code allowed to use string_buff */
+//     DOD_COMP char *                         string_buff;
+//     DOD_COMP char *                         string_buff_end;
+//                                         }
+
+
+// typedef struct                      mawk_soa_page {
+//           STRING const * const          the_empty_str;
+//     COMP( STRING,                       null_str ); // a well known string
+
+// /*  `string_buff` a useful scratch area
+//     Once execute() starts the sprintf code is (belatedly) the only code allowed to use string_buff */
+//    COMP( char *,                       string_buff );
+//    COMP( char *,                       string_buff_end );
+
+// }                                   mawk_state_t;
 
 /* a well known string */
 extern STRING         null_str;
 extern STRING * const the_empty_str;
 
 /* `string_buff` a useful scratch area
-
-    Once execute() starts the sprintf code is (belatedly) the only code allowed
-   to use string_buff
+    Once execute() starts the sprintf code is (belatedly) the only code allowed to use string_buff
 */
 extern char * string_buff;
 extern char * string_buff_end;
@@ -157,7 +176,7 @@ void   mawk_exit( int );
 void   da( INST *, FILE * );
 char * str_str( const char *, size_t, const char *, size_t );
 size_t rm_escape( char * );
-char * re_pos_match( const char *, size_t, PTR, size_t *, Bool );
+char * re_pos_match( const char *, size_t, void *, size_t *, Bool );
 int    binmode( void );
 
 void bozo( const char * );

@@ -23,7 +23,7 @@ you agree to not name that product mawk.
 
 typedef struct re_node {
     const STRING *   sval;
-    PTR              re;
+   void *             re;
     struct re_node * link;
 } RE_NODE;
 
@@ -44,7 +44,7 @@ static char efmt[]= "regular expression compile failed (%s)\n%s";
    would cause repeated compilation to an RE machine of the string in var.
    So having that string near or at front of list is beneficial.
 */
-PTR
+void *
 re_compile( const STRING * sval )
 {
     RE_NODE * p= re_list;
@@ -67,13 +67,13 @@ re_compile( const STRING * sval )
 
     /* not found */
     {
-        PTR re= REcompile( sval->str, sval->len );
+       void * re= REcompile( sval->str, sval->len );
         if ( re == 0 ) {
             if ( mawk_state == EXECUTION ) {
                 rt_error( efmt, REerrlist[REerrno], sval->str );
             } else { /* compiling */
                 compile_error( efmt, REerrlist[REerrno], sval->str );
-                return (PTR)0;
+                return (void *)0;
             }
         }
         p      = ZMALLOC( RE_NODE );
@@ -98,7 +98,7 @@ _return:
 /* this is only used by da() */
 
 const STRING *
-re_uncompile( PTR m )
+re_uncompile(void * m )
 {
     register RE_NODE * p;
 

@@ -27,7 +27,7 @@ you agree to not name that product mawk.
 
 extern const char* const shell ; /* for pipes and system() */
 
-PTR   file_find(STRING *, int) ;
+void *   file_find(STRING *, int) ;
 int   file_close(STRING *) ;
 int   file_flush(STRING *) ;
 void  flush_all_output(void) ;

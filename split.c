@@ -85,7 +85,7 @@ space_split( const char * s, size_t slen )
 
     while ( 1 ) {
         /* eat space */
-        while ( scan_code[*(const unsigned char *)s] == SC_SPACE ) {
+        while ( scan_code_get(*(const unsigned char *)s) == SC_SPACE ) {
             s++;
         }
         if ( s == end ) {
@@ -94,7 +94,7 @@ space_split( const char * s, size_t slen )
         /* find one field */
         {
             const char * q = s++; /* q is front of field */
-            while ( s < end && scan_code[*(const unsigned char *)s] != SC_SPACE )
+            while ( s < end && scan_code_get(*(const unsigned char *)s) != SC_SPACE )
                 s++;
             /* create and store the string field */
             node_p->strings[idx] = new_STRING2( q, s - q );
@@ -109,7 +109,7 @@ space_split( const char * s, size_t slen )
 }
 
 size_t
-re_split( const char * s, size_t slen, PTR re )
+re_split( const char * s, size_t slen, void * re )
 {
     size_t             cnt            = 0;
     const char *       end            = s + slen;
@@ -158,7 +158,7 @@ re_split( const char * s, size_t slen, PTR re )
  */
 char *
 re_pos_match(
-    const char * str, size_t str_len, PTR re, size_t * lenp, int no_front_match)
+    const char * str, size_t str_len, void * re, size_t * lenp, int no_front_match)
 {
     const char * end = str + str_len;
 
@@ -219,7 +219,7 @@ transfer_to_array( CELL cp[], size_t cnt )
     unsigned           idx    = 0;
     while ( cnt > 0 ) {
         cp->type = C_MBSTRN;
-        cp->ptr  = (PTR)node_p->strings[idx];
+        cp->ptr  = (void *)node_p->strings[idx];
         cnt--;
         cp++;
         if ( ++idx == SP_SIZE ) {
@@ -249,7 +249,7 @@ transfer_to_fields( size_t cnt )
     while ( cnt > 0 ) {
         cell_destroy( fp );
         fp->type = C_MBSTRN;
-        fp->ptr  = (PTR)node_p->strings[idx];
+        fp->ptr  = (void *)node_p->strings[idx];
         cnt--;
         if ( ++idx == SP_SIZE ) {
             idx    = 0;

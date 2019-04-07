@@ -20,7 +20,9 @@ you agree to not name that product mawk.
 
 #include "types.h"
 
+
 #define  HASH_PRIME     113
+
 
 /* struct to hold info about builtins */
 typedef struct {
@@ -142,7 +144,7 @@ unsigned     hash( const char * );
 unsigned     hash2( const char *, size_t );
 SYMTAB *     insert( const char * );
 SYMTAB *     find( const char * );
-const char * reverse_find( int, PTR );
+const char * reverse_find( int,void *);
 SYMTAB *     save_id( const char * );
 void         restore_ids( void );
 

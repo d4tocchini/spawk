@@ -38,7 +38,7 @@ stackp->u = (ux)
    reference.  If no match returns NULL and length zero */
 
 char *REmatch(const char* str, size_t str_len ,
-              PTR machine, size_t* lenp, Bool no_front_match)
+             void * machine, size_t* lenp, Bool no_front_match)
 {
    STATE *m = (STATE *) machine ;
    const char *s ;

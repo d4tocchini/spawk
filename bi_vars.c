@@ -64,16 +64,16 @@ bi_vars_init( void )
     /* set defaults */
 
     FILENAME->type = C_STRING;
-    FILENAME->ptr  = (PTR)new_STRING( "" );
+    FILENAME->ptr  = (void *)new_STRING( "" );
 
     OFS->type = C_STRING;
-    OFS->ptr  = (PTR)new_STRING( " " );
+    OFS->ptr  = (void *)new_STRING( " " );
 
     ORS->type = C_STRING;
-    ORS->ptr  = (PTR)new_STRING( "\n" );
+    ORS->ptr  = (void *)new_STRING( "\n" );
 
     SUBSEP->type = C_STRING;
-    SUBSEP->ptr  = (PTR)new_STRING( "\034" );
+    SUBSEP->ptr  = (void *)new_STRING( "\034" );
 
     NR->type = FNR->type = C_DOUBLE;
     /* dval is already 0.0 */

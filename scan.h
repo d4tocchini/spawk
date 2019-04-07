@@ -27,10 +27,16 @@ you agree to not name that product mawk.
 #include  "parse.h"
 #endif
 
-extern int                      scan_code[256] ;
+// extern  int     scan_code_cleaned;
+#define SCAN_CODE_CLEAN        //scan_code_cleaned = 1
+#define SCAN_CODE_DIRTY        //scan_code_cleaned = 0
+
+extern  int        scan_code_NL_value;
+#define SCAN_CODE_SET_NL(code) scan_code_NL_value = code
+
+ int scan_code_get(const unsigned char c);
 
 /*  the scan codes to compactify the main switch */
-
 #define                         SC_SPACE               1
 #define                         SC_NL                  2
 #define                         SC_SEMI_COLON          3

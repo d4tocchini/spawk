@@ -60,7 +60,7 @@ RE_error_trap(int x)
 }
 
 
-PTR
+void *
 REcompile(const char* re, size_t re_len)
 {
    MACHINE m_stack[STACKSZ] ;
@@ -82,10 +82,10 @@ REcompile(const char* re, size_t re_len)
    {
       STATE *p = (STATE *) RE_malloc(sizeof(STATE)) ;
       p->type = M_ACCEPT ;
-      return (PTR) p ;
+      return (void *) p ;
    }
 
-   if (setjmp(err_buf))	 return (PTR) 0 ;
+   if (setjmp(err_buf))	 return (void *) 0 ;
    /* we used to try to recover memory left on machine stack ;
      but now m_ptr is in a register so it won't be right unless
      we force it out of a register which isn't worth the trouble */
@@ -119,7 +119,7 @@ REcompile(const char* re, size_t re_len)
 		   if ((m_ptr->stop -1)->type == M_WAIT) {
 			(m_ptr->stop - 1)->type = M_ACCEPT ;
 		   }
-	           return (PTR) m_ptr->start ;
+	           return (void *) m_ptr->start ;
 	       }
 	       else
 	       {

@@ -13,15 +13,12 @@ If you import elements of this code into another product,
 you agree to not name that product mawk.
 ********************************************/
 
-
 #include <stdio.h>
 
-PTR   REcompile(const char *, size_t)  ;
-int   REtest (const char *, size_t, PTR)  ;
-char *REmatch(const char *, size_t, PTR, size_t*, Bool)  ;
-void  REmprint(PTR , FILE*) ;
+void *    REcompile( const char *, size_t );
+int    REtest( const char *, size_t, void * );
+char * REmatch( const char *, size_t, void *, size_t *, Bool );
+void   REmprint( void *, FILE * );
 
-extern  int  REerrno ;
-extern  const char* const REerrlist[] ;
-
-
+extern int                REerrno;
+extern const char * const REerrlist[];

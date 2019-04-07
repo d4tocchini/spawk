@@ -222,12 +222,12 @@ const char* parse_spec(const char* str, const char* end, Spec* tail)
         else {
             unsigned char c = *(unsigned char*) str ;
 
-            if (scan_code[c] == SC_DIGIT) {
+            if (scan_code_get(c) == SC_DIGIT) {
                 spec->width = c - '0' ;
                 str++ ;
                 while(1) {
                     c = *(unsigned char*) str ;
-                    if (scan_code[c] != SC_DIGIT) break ;
+                    if (scan_code_get(c) != SC_DIGIT) break ;
                     spec->width = spec->width * 10 + c - '0' ;
                     str++ ;
                 }
@@ -247,7 +247,7 @@ const char* parse_spec(const char* str, const char* end, Spec* tail)
                 spec->prec = 0 ;
                 while(1) {
                     c = * (unsigned char*) str ;
-                    if (scan_code[c] != SC_DIGIT) break ;
+                    if (scan_code_get(c) != SC_DIGIT) break ;
                     spec->prec = spec->prec * 10 + c - '0' ;
                     str++ ;
                 }
